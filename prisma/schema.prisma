@@ -6,3 +6,47 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Seller {
+  id          Int       @id @default(autoincrement())
+  userId      String    @unique @map("user_id")
+  CEOName     String    @map("ceo_name")
+  companyName String    @map("company_name")
+  password    String
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @default(now()) @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  products    SellerProduct[]
+
+  @@map("seller")
+}
+
+model Product {
+  id          Int       @id @default(autoincrement())
+  productName String    @map("product_name")
+  productDesc String    @map("product_desc")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @default(now()) @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+	Sellers     SellerProduct[]
+
+  @@map("product")
+}
+
+model SellerProduct {
+  id        Int       @id @default(autoincrement())
+  sellerId  Int    @map("seller_id")
+  productId Int    @map("product_id")
+  price     Int
+  count     Int
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @default(now()) @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  seller    Seller    @relation(fields: [sellerId], references: [id])
+  product   Product   @relation(fields: [productId], references: [id])
+
+  @@map("seller_product")
+}
