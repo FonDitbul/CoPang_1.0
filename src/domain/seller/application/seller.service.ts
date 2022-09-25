@@ -10,7 +10,15 @@ export class SellerService {
   // TODO find 할때 password 안가져오는 DTO 다루기
   async getOneSeller(userId: string): Promise<Seller> {
     const oneSeller = await this.sellerRepository.findOne(userId);
-    return oneSeller;
+    try {
+      if (oneSeller.deletedAt) {
+        new Error('deleted seller');
+      }
+      return oneSeller;
+    } catch (e) {
+      console.error(e);
+      throw e;
+    }
   }
 
   async getAllSeller(): Promise<Seller[]> {
@@ -24,7 +32,16 @@ export class SellerService {
   }
 
   async deleteOneSeller(userId: string): Promise<Seller> {
-    const deletedSeller = await this.sellerRepository.delete(userId);
-    return deletedSeller;
+    const oneSeller = await this.sellerRepository.findOne(userId);
+    try {
+      if (oneSeller.deletedAt) {
+        new Error('deleted seller');
+      }
+      const deletedSeller = await this.sellerRepository.delete(userId);
+      return deletedSeller;
+    } catch (e) {
+      console.error(e);
+      throw e;
+    }
   }
 }
