@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Seller } from '@prisma/client';
+import { Seller } from '../../../domain/service/seller/seller';
 import { CreateSellerDto } from './seller.dto';
 import { ISellerRepository } from '../../../domain/service/seller/seller.repository';
 import { PrismaService } from '../../prisma/prisma.service';

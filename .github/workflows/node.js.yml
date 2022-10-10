@@ -27,8 +27,8 @@ jobs:
           cache: 'npm'
           cache-dependency-path:  '**/package-lock.json'
       - run: npm ci
-      - name: prisma schema 생성
-        run: prisma generate
+#      - name: prisma schema 생성
+#        run: prisma generate
       - name: lint 적용
         run: npm run lint
       - name: build
