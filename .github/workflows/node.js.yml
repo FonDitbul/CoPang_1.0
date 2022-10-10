@@ -35,10 +35,10 @@ jobs:
         run: npm run build
       - name: 테스트
         run: npm run test
-      - name: test coverage blocking
-        uses: anuraag016/Jest-Coverage-Diff@V1.4
-        with:
-          fullCoverageDiff: false
-          runCommand: "npx jest --collectCoverageFrom='[\"src/**/*.{js,jsx,ts,tsx}\"]' --coverage --collectCoverage=true --coverageDirectory='./' --coverageReporters='json-summary' --forceExit --detectOpenHandles test/.*test.*"
-          delta: 0.6
+#      - name: test coverage blocking
+#        uses: anuraag016/Jest-Coverage-Diff@V1.4
+#        with:
+#          fullCoverageDiff: false
+#          runCommand: "npx jest --collectCoverageFrom='[\"src/**/*.{js,jsx,ts,tsx}\"]' --coverage --collectCoverage=true --coverageDirectory='./' --coverageReporters='json-summary' --forceExit --detectOpenHandles test/.*test.*"
+#          delta: 0.6
 
