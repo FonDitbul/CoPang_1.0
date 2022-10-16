@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { SellerService } from '../../../application/service/seller/seller.service';
 import { SellerController } from './seller.controller';
-import { SellerRepository } from './seller.repository';
+import { SellerPrismaRepository } from './seller.prisma.repository';
 
 @Module({
   imports: [],
@@ -10,7 +10,7 @@ import { SellerRepository } from './seller.repository';
   providers: [
     {
       provide: 'ISellerRepository',
-      useClass: SellerRepository,
+      useClass: SellerPrismaRepository,
     },
     {
       provide: 'ISellerService',

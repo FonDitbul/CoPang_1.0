@@ -9,15 +9,11 @@ export class SellerService implements ISellerService {
 
   async getOne(userId: string): Promise<Seller> {
     const oneSeller = await this.sellerRepository.findOne(userId);
-    try {
-      if (oneSeller.deletedAt) {
-        new Error('deleted seller');
-      }
-      return oneSeller;
-    } catch (e) {
-      console.error(e);
-      throw e;
+    if (oneSeller.deletedAt) {
+      console.error('deleted seller');
+      return null;
     }
+    return oneSeller;
   }
 
   async getAll(): Promise<Seller[]> {
@@ -32,15 +28,11 @@ export class SellerService implements ISellerService {
 
   async delete(userId: string): Promise<Seller> {
     const oneSeller = await this.sellerRepository.findOne(userId);
-    try {
-      if (oneSeller.deletedAt) {
-        new Error('deleted seller');
-      }
-      const deletedSeller = await this.sellerRepository.delete(userId);
-      return deletedSeller;
-    } catch (e) {
-      console.error(e);
-      throw e;
+    if (oneSeller.deletedAt) {
+      console.error('이미 삭제된 유저');
+      return null;
     }
+    const deletedSeller = await this.sellerRepository.delete(userId);
+    return deletedSeller;
   }
 }

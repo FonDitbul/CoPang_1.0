@@ -1,5 +1,5 @@
-import { Body, Controller, Delete, Get, Inject, Param, Post } from '@nestjs/common';
-import { CreateSellerDto } from './seller.dto';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Inject, Param, Post } from '@nestjs/common';
+import { CreateSellerRequest } from './seller.dto';
 import { Seller } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 
@@ -8,22 +8,60 @@ export class SellerController {
   constructor(@Inject('ISellerService') private sellerService: ISellerService) {}
 
   @Get('/seller')
-  async getAll(): Promise<Seller[]> {
-    return await this.sellerService.getAll();
+  async getAll() {
+    const allSeller = await this.sellerService.getAll();
+
+    type TSellerResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>;
+    const response: TSellerResponse[] = allSeller.map((seller) => {
+      return {
+        userId: seller.userId,
+        ceoName: seller.ceoName,
+        companyName: seller.companyName,
+      };
+    });
+
+    return response;
   }
 
   @Get('/seller/:userId')
-  async getOne(@Param('userId') userId: string): Promise<Seller> {
-    return await this.sellerService.getOne(userId);
+  async getOne(@Param('userId') userId: string) {
+    const oneSeller = await this.sellerService.getOne(userId);
+    if (!oneSeller) {
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    }
+
+    type TSellerResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>;
+    const response: TSellerResponse = {
+      userId: oneSeller.userId,
+      ceoName: oneSeller.ceoName,
+      companyName: oneSeller.companyName,
+    };
+
+    return response;
   }
 
   @Post('/seller')
-  async create(@Body() createSellerDto: CreateSellerDto): Promise<Seller> {
-    return await this.sellerService.create(createSellerDto);
+  async create(@Body() createSellerRequest: CreateSellerRequest) {
+    const oneSeller = await this.sellerService.create(createSellerRequest);
+    type TSellerResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>;
+    const response: TSellerResponse = {
+      userId: oneSeller.userId,
+      ceoName: oneSeller.ceoName,
+      companyName: oneSeller.companyName,
+    };
+
+    return response;
   }
 
   @Delete('/seller/:userId')
-  async delete(@Param('userId') userId: string): Promise<Seller> {
-    return await this.sellerService.delete(userId);
+  async delete(@Param('userId') userId: string) {
+    const oneSeller = await this.sellerService.delete(userId);
+    type TSellerResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>;
+    const response: TSellerResponse = {
+      userId: oneSeller.userId,
+      ceoName: oneSeller.ceoName,
+      companyName: oneSeller.companyName,
+    };
+    return response;
   }
 }

@@ -39,8 +39,6 @@ describe('seller service test ', () => {
         ceoName: 'testCEO',
         companyName: 'testCompany',
         password: 'testPassword',
-        createdAt: new Date(),
-        updatedAt: new Date(),
         deletedAt: null,
       };
       const createSeller = {
@@ -69,8 +67,6 @@ describe('seller service test ', () => {
           ceoName: 'testCEO',
           companyName: 'testCompany',
           password: 'testPassword',
-          createdAt: new Date(),
-          updatedAt: new Date(),
           deletedAt: null,
         },
         {
@@ -79,8 +75,6 @@ describe('seller service test ', () => {
           ceoName: 'testCEO2',
           companyName: 'testCompany2',
           password: 'testPassword',
-          createdAt: new Date(),
-          updatedAt: new Date(),
           deletedAt: null,
         },
       ];
@@ -105,8 +99,6 @@ describe('seller service test ', () => {
         ceoName: 'testCEO',
         companyName: 'testCompany',
         password: 'testPassword',
-        createdAt: new Date(),
-        updatedAt: new Date(),
         deletedAt: null,
       };
 
@@ -128,8 +120,6 @@ describe('seller service test ', () => {
         ceoName: 'testCEO',
         companyName: 'testCompany',
         password: 'testPassword',
-        createdAt: new Date(),
-        updatedAt: new Date(),
         deletedAt: new Date(),
       };
 
@@ -153,8 +143,6 @@ describe('seller service test ', () => {
         ceoName: 'testCEO',
         companyName: 'testCompany',
         password: 'testPassword',
-        createdAt: new Date(),
-        updatedAt: new Date(),
         deletedAt: new Date(),
       };
 
@@ -175,8 +163,6 @@ describe('seller service test ', () => {
         ceoName: 'testCEO',
         companyName: 'testCompany',
         password: 'testPassword',
-        createdAt: new Date(),
-        updatedAt: new Date(),
         deletedAt: null,
       };
 
