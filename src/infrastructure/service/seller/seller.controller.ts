@@ -11,12 +11,13 @@ export class SellerController {
   async getAll() {
     const allSeller = await this.sellerService.getAll();
 
-    type TSellerResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>;
+    type TSellerResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName' | 'deletedAt'>;
     const response: TSellerResponse[] = allSeller.map((seller) => {
       return {
         userId: seller.userId,
         ceoName: seller.ceoName,
         companyName: seller.companyName,
+        deletedAt: seller.deletedAt,
       };
     });
 
@@ -30,11 +31,12 @@ export class SellerController {
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     }
 
-    type TSellerResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>;
+    type TSellerResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName' | 'deletedAt'>;
     const response: TSellerResponse = {
       userId: oneSeller.userId,
       ceoName: oneSeller.ceoName,
       companyName: oneSeller.companyName,
+      deletedAt: oneSeller.deletedAt,
     };
 
     return response;
