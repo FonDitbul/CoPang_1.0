@@ -27,12 +27,16 @@
     "@nestjs/platform-express": "^8.4.7",
     "@prisma/client": "^4.2.1",
     "@types/bcrypt": "^5.0.0",
+    "@types/express-session": "^1.17.5",
+    "@types/session-file-store": "^1.2.2",
     "bcrypt": "^5.1.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
+    "express-session": "^1.17.3",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",
+    "session-file-store": "^1.5.0",
     "webpack": "^5.74.0"
   },
   "devDependencies": {
