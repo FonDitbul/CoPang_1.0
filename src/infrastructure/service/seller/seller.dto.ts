@@ -13,3 +13,11 @@ export class CreateSellerRequest {
   @IsString()
   password: string;
 }
+
+export class SellerSignInIn {
+  @IsString()
+  userId: string;
+
+  @IsString()
+  password: string;
+}

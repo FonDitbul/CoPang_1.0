@@ -8,3 +8,8 @@ export type Seller = {
 };
 
 export type TCreateSeller = Pick<Seller, 'userId' | 'ceoName' | 'companyName' | 'password'>;
+
+export interface ISellerSignInIn {
+  userId: string;
+  password: string;
+}

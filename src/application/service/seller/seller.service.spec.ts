@@ -2,6 +2,10 @@ import { SellerService } from './seller.service';
 import { ISellerRepository } from '../../../domain/service/seller/seller.repository';
 import { Seller, TCreateSeller } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
+import { IAuthService } from '../../../domain/service/auth/auth.service';
+import { IPasswordEncryptor } from '../../../domain/service/auth/encrypt/password.encryptor';
+import { PasswordBcryptEncryptor } from '../auth/encrypt/password.bcrypt.encryptor';
+import { AuthService } from '../auth/auth.service';
 
 class MockSellerRepository implements ISellerRepository {
   create(seller: TCreateSeller): Promise<Seller> {
@@ -24,10 +28,15 @@ class MockSellerRepository implements ISellerRepository {
 describe('seller service test ', () => {
   let testSellerService: ISellerService;
   let sellerRepository: MockSellerRepository;
+  let authService: IAuthService;
+  let passwordBcryptEncryptor: IPasswordEncryptor;
 
   beforeEach(async () => {
     sellerRepository = new MockSellerRepository();
-    testSellerService = new SellerService(sellerRepository);
+
+    passwordBcryptEncryptor = new PasswordBcryptEncryptor();
+    authService = new AuthService(passwordBcryptEncryptor);
+    testSellerService = new SellerService(sellerRepository, authService);
   });
 
   describe('판매자 회원가입', () => {

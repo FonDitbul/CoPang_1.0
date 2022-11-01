@@ -1,7 +1,11 @@
 import { CreateSellerRequest } from './seller.dto';
 import { SellerController } from './seller.controller';
-import { Seller, TCreateSeller } from '../../../domain/service/seller/seller';
+import { ISignInSeller, Seller, TCreateSeller } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
+import { IAuthService } from '../../../domain/service/auth/auth.service';
+import { IPasswordEncryptor } from '../../../domain/service/auth/encrypt/password.encryptor';
+import { PasswordBcryptEncryptor } from '../../../application/service/auth/encrypt/password.bcrypt.encryptor';
+import { AuthService } from '../../../application/service/auth/auth.service';
 
 class MockSellerService implements ISellerService {
   create(seller: TCreateSeller): Promise<Seller> {
@@ -19,15 +23,27 @@ class MockSellerService implements ISellerService {
   getOne(userId: string): Promise<Seller> {
     return Promise.resolve(undefined);
   }
+
+  signIn(signInSeller: ISignInSeller): Promise<Seller> {
+    return Promise.resolve(undefined);
+  }
+
+  signOut(userId: string): Promise<boolean> {
+    return Promise.resolve(false);
+  }
 }
 
 describe('판매자 controller', () => {
   let sellerController: SellerController;
   let sellerService: ISellerService;
+  let authService: IAuthService;
+  let passwordBcryptEncryptor: IPasswordEncryptor;
 
   beforeEach(async () => {
     sellerService = new MockSellerService();
-    sellerController = new SellerController(sellerService);
+    passwordBcryptEncryptor = new PasswordBcryptEncryptor();
+    authService = new AuthService(passwordBcryptEncryptor);
+    sellerController = new SellerController(sellerService, authService);
   });
   describe('/seller/:userId (GET)', () => {
     test('특정 유저 가져오기 ', async () => {

@@ -1,11 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Seller, TCreateSeller } from '../../../domain/service/seller/seller';
+import { ISellerSignInIn, Seller, TCreateSeller } from '../../../domain/service/seller/seller';
 import { ISellerRepository } from '../../../domain/service/seller/seller.repository';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
+import { IAuthService } from '../../../domain/service/auth/auth.service';
 
 @Injectable()
 export class SellerService implements ISellerService {
-  constructor(@Inject('ISellerRepository') private sellerRepository: ISellerRepository) {}
+  constructor(@Inject('ISellerRepository') private sellerRepository: ISellerRepository, @Inject('IAuthService') private authService: IAuthService) {}
 
   async getOne(userId: string): Promise<Seller> {
     const oneSeller = await this.sellerRepository.findOne(userId);
@@ -34,5 +35,29 @@ export class SellerService implements ISellerService {
     }
     const deletedSeller = await this.sellerRepository.delete(userId);
     return deletedSeller;
+  }
+
+  async signIn(seller: ISellerSignInIn) {
+    // 1. user Id를 통해 seller 정보 가져오기
+    const oneSeller = await this.sellerRepository.findOne(seller.userId);
+    if (!oneSeller || oneSeller.deletedAt) {
+      return null;
+    }
+
+    // 2. password 가 일치하는지 판단
+    const comparePassword = await this.authService.signIn(seller.password, oneSeller.password);
+    if (!comparePassword) {
+      return null;
+    }
+
+    return oneSeller;
+  }
+  async signOut(userId: string) {
+    const oneSeller = await this.sellerRepository.findOne(userId);
+    if (!oneSeller || oneSeller.deletedAt) {
+      return null;
+    }
+
+    return true;
   }
 }

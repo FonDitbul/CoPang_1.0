@@ -1,11 +1,14 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Inject, Param, Post } from '@nestjs/common';
-import { CreateSellerRequest } from './seller.dto';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Inject, Param, Post, Session, UseGuards, UseInterceptors } from '@nestjs/common';
+import { CreateSellerRequest, SellerSignInIn } from './seller.dto';
 import { Seller } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
+import { IAuthService } from '../../../domain/service/auth/auth.service';
+import { AuthHttpGuard } from '../auth/auth.http.guard';
+import { SessionSignInInterceptor, SessionSignOutInterceptor } from '../auth/auth.interceptor.session';
 
 @Controller()
 export class SellerController {
-  constructor(@Inject('ISellerService') private sellerService: ISellerService) {}
+  constructor(@Inject('ISellerService') private sellerService: ISellerService, @Inject('IAuthService') private authService: IAuthService) {}
 
   @Get('/seller')
   async getAll() {
@@ -65,5 +68,33 @@ export class SellerController {
       companyName: oneSeller.companyName,
     };
     return response;
+  }
+
+  @Post('/seller/signIn')
+  @UseInterceptors(SessionSignInInterceptor)
+  async signIn(@Session() session: Record<string, any>, @Body() signInSeller: SellerSignInIn) {
+    type TSellerResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>;
+    const seller = await this.sellerService.signIn(signInSeller);
+    if (!seller) {
+      throw new HttpException('UnauthorizedException', HttpStatus.UNAUTHORIZED);
+    }
+
+    const response: TSellerResponse = {
+      userId: seller.userId,
+      ceoName: seller.ceoName,
+      companyName: seller.companyName,
+    };
+
+    return response;
+  }
+
+  @UseGuards(AuthHttpGuard)
+  @UseInterceptors(SessionSignOutInterceptor)
+  @Post('/seller/signOut')
+  async signOut(@Session() session: Record<string, any>) {
+    const seller = await this.sellerService.signOut(session.user.userId);
+    if (!seller) {
+      throw new HttpException('UnauthorizedException', HttpStatus.UNAUTHORIZED);
+    }
   }
 }
