@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Seller, SellerSignUpInbound } from '../../../domain/service/seller/seller';
+import { Seller, SellerSignUpInbound, SellerSignUpOutbound } from '../../../domain/service/seller/seller';
 import { ISellerRepository } from '../../../domain/service/seller/seller.repository';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 
@@ -22,7 +22,10 @@ export class SellerService implements ISellerService {
   }
 
   async signUp(sellerSignUpInbound: SellerSignUpInbound): Promise<Seller> {
-    return await this.sellerRepository.create(sellerSignUpInbound);
+    const sellerSignUpOutbound: SellerSignUpOutbound = {
+      ...sellerSignUpInbound,
+    }
+    return await this.sellerRepository.create(sellerSignUpOutbound);
   }
 
   async delete(userId: string): Promise<Seller> {
