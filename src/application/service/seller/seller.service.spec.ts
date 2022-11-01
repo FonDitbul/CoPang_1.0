@@ -1,60 +1,58 @@
+import { MockProxy, mock, any } from 'jest-mock-extended'
 import { SellerService } from './seller.service';
 import { ISellerRepository } from '../../../domain/service/seller/seller.repository';
-import { Seller, SellerSignUpInbound } from '../../../domain/service/seller/seller';
+import { Seller } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
-
-class MockSellerRepository implements ISellerRepository {
-  create(seller: SellerSignUpInbound): Promise<Seller> {
-    return Promise.resolve(undefined);
-  }
-
-  delete(userId: string): Promise<Seller> {
-    return Promise.resolve(undefined);
-  }
-
-  findAll(): Promise<Seller[]> {
-    return Promise.resolve([]);
-  }
-
-  findOne(userId: string): Promise<Seller> {
-    return Promise.resolve(undefined);
-  }
-}
+import { IPasswordEncryptor } from "../../../domain/service/auth/encrypt/password.encryptor";
 
 describe('seller service test ', () => {
-  let testSellerService: ISellerService;
-  let sellerRepository: MockSellerRepository;
+  const sellerRepository: MockProxy<ISellerRepository> = mock<ISellerRepository>();
+  const passwordEncryptor: MockProxy<IPasswordEncryptor> = mock<IPasswordEncryptor>();
+  const sut: ISellerService = new SellerService(sellerRepository, passwordEncryptor); // System Under Test
 
-  beforeEach(async () => {
-    sellerRepository = new MockSellerRepository();
-    testSellerService = new SellerService(sellerRepository);
-  });
+  const givenSeller: Seller = {
+    id: 1,
+    userId: 'test',
+    ceoName: 'testCEO',
+    companyName: 'testCompany',
+    password: 'testPassword',
+    deletedAt: null,
+  }
 
-  describe('판매자 회원가입', () => {
-    test('판매자 생성', async () => {
-      // 유저 생성하기 Test 코드
-      const savedSeller: Seller = {
-        id: 1,
-        userId: 'test',
-        ceoName: 'testCEO',
-        companyName: 'testCompany',
-        password: 'testPassword',
-        deletedAt: null,
-      };
-      const createSeller = {
-        userId: savedSeller.userId,
-        ceoName: savedSeller.ceoName,
-        companyName: savedSeller.companyName,
-        password: savedSeller.password,
-      };
-      const sellerRepositorySaveSpy = jest.spyOn(sellerRepository, 'create').mockResolvedValue(savedSeller);
+  describe('판매자 회원가입 테스트', () => {
+    const givenSignInSeller = {
+      userId: givenSeller.userId,
+      ceoName: givenSeller.ceoName,
+      companyName: givenSeller.companyName,
+      password: givenSeller.password,
+    }
+
+    test('주어진 아이디로 이미 회원가입한 판매자가 존재할 경우 에러가 발생한다.', async () => {
+      sellerRepository.findOne.calledWith(givenSeller.userId).mockResolvedValue(givenSeller);
+
       try {
-        const result = await testSellerService.signUp(createSeller);
-        expect(result).toEqual(savedSeller);
-        expect(sellerRepositorySaveSpy).toHaveBeenCalledWith(savedSeller);
+        await sut.signUp(givenSignInSeller);
       } catch (e) {
-        // console.error(e);
+        expect(e.message).toEqual("이미 등록된 판매자 아이디");
       }
+    });
+
+    test('주어진 아이디로 회원가입한 판매자가 존재하지 않을 경우 비밀번호가 암호화되어 정상적으로 등록된다.', async () => {
+      const givenEncryptedPassword = "someEncryptedPassword"
+      sellerRepository.findOne.calledWith(any()).mockResolvedValue(null);
+      sellerRepository.create.calledWith(any()).mockResolvedValue(givenSeller);
+      passwordEncryptor.encrypt.calledWith(any()).mockResolvedValue(givenEncryptedPassword)
+      const expectedSavedSeller = {
+        ...givenSignInSeller,
+        password: givenEncryptedPassword
+      }
+
+      const actualSeller = await sut.signUp(givenSignInSeller);
+
+      expect(sellerRepository.create).toHaveBeenCalledWith(expectedSavedSeller);
+      expect(actualSeller.userId).toEqual(givenSeller.userId);
+      expect(actualSeller.ceoName).toEqual(givenSeller.ceoName);
+      expect(actualSeller.companyName).toEqual(givenSeller.companyName);
     });
   });
 
@@ -81,7 +79,7 @@ describe('seller service test ', () => {
 
       const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findAll').mockResolvedValue(savedSellerArray);
       try {
-        const result = await testSellerService.getAll();
+        const result = await sut.getAll();
         expect(result).toEqual(savedSellerArray);
         expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(savedSellerArray);
       } catch (e) {
@@ -104,7 +102,7 @@ describe('seller service test ', () => {
 
       const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockResolvedValue(savedSeller);
       try {
-        const result = await testSellerService.getOne(savedSeller.userId);
+        const result = await sut.getOne(savedSeller.userId);
         expect(result).toEqual(savedSeller);
         expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(savedSeller);
       } catch (e) {
@@ -125,7 +123,7 @@ describe('seller service test ', () => {
 
       const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockRejectedValue(new Error('deleted seller'));
       try {
-        const result = await testSellerService.getOne(savedSeller.userId);
+        const result = await sut.getOne(savedSeller.userId);
         expect(savedSeller.deletedAt).toBeInstanceOf(Date);
         expect(sellerRepositoryFindOneSpy).toThrow();
       } catch (e) {
@@ -149,7 +147,7 @@ describe('seller service test ', () => {
       const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'delete').mockRejectedValue(new Error('deleted seller'));
 
       try {
-        await testSellerService.delete(deletedSeller.userId);
+        await sut.delete(deletedSeller.userId);
         expect(sellerRepositoryFindOneSpy).toThrow();
       } catch (e) {
         // console.error(e);
@@ -169,7 +167,7 @@ describe('seller service test ', () => {
       const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'delete').mockResolvedValue(deletedSeller);
 
       try {
-        const result = await testSellerService.delete(deletedSeller.userId);
+        const result = await sut.delete(deletedSeller.userId);
 
         expect(result).toEqual(deletedSeller);
         expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(deletedSeller);
