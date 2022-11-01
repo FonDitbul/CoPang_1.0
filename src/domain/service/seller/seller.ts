@@ -10,3 +10,8 @@ export type Seller = {
 export type TSellerSignUpIn = Pick<Seller, 'userId' | 'ceoName' | 'companyName' | 'password'>;
 
 export type TSellerSignUpOut = Pick<Seller, 'userId' | 'ceoName' | 'companyName' | 'password'>;
+
+export interface ISellerSignInIn {
+  userId: string;
+  password: string;
+}

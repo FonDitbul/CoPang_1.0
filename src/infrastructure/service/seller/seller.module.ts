@@ -3,9 +3,10 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { SellerService } from '../../../application/service/seller/seller.service';
 import { SellerController } from './seller.controller';
 import { SellerPrismaRepository } from './seller.prisma.repository';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [],
+  imports: [AuthModule],
   controllers: [SellerController],
   providers: [
     {

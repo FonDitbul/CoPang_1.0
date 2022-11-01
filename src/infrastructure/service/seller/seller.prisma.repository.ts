@@ -8,6 +8,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 export class SellerPrismaRepository implements ISellerRepository {
   constructor(private prisma: PrismaService) {}
 
+  // TODO 여기서 데이터가 없다고 500 에러 뱉는건 말이 안됨 테스트 및 체크 필요
   async findOne(userId: string): Promise<SellerEntity | null> {
     return await this.prisma.seller.findUnique({
       where: {

@@ -21,3 +21,13 @@ export class TSellerSignUpRequest {
 }
 
 export type TSellerSignUpResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>;
+
+export class SellerSignInIn {
+  @IsString()
+  userId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$")
+  password: string;
+}
