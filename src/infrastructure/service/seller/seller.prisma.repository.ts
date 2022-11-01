@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Seller as SellerEntity } from '@prisma/client';
-import { TCreateSeller } from '../../../domain/service/seller/seller';
+import { SellerSignUpInbound } from '../../../domain/service/seller/seller';
 import { ISellerRepository } from '../../../domain/service/seller/seller.repository';
 import { PrismaService } from '../../prisma/prisma.service';
 
@@ -20,7 +20,7 @@ export class SellerPrismaRepository implements ISellerRepository {
     return await this.prisma.seller.findMany({});
   }
 
-  async create(seller: TCreateSeller): Promise<SellerEntity> {
+  async create(seller: SellerSignUpInbound): Promise<SellerEntity> {
     return await this.prisma.seller.create({
       data: {
         userId: seller.userId,

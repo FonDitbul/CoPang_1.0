@@ -7,4 +7,4 @@ export type Seller = {
   deletedAt: Date | null;
 };
 
-export type TCreateSeller = Pick<Seller, 'userId' | 'ceoName' | 'companyName' | 'password'>;
+export type SellerSignUpInbound = Pick<Seller, 'userId' | 'ceoName' | 'companyName' | 'password'>;

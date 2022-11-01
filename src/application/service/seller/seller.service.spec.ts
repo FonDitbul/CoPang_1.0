@@ -1,10 +1,10 @@
 import { SellerService } from './seller.service';
 import { ISellerRepository } from '../../../domain/service/seller/seller.repository';
-import { Seller, TCreateSeller } from '../../../domain/service/seller/seller';
+import { Seller, SellerSignUpInbound } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 
 class MockSellerRepository implements ISellerRepository {
-  create(seller: TCreateSeller): Promise<Seller> {
+  create(seller: SellerSignUpInbound): Promise<Seller> {
     return Promise.resolve(undefined);
   }
 
@@ -49,7 +49,7 @@ describe('seller service test ', () => {
       };
       const sellerRepositorySaveSpy = jest.spyOn(sellerRepository, 'create').mockResolvedValue(savedSeller);
       try {
-        const result = await testSellerService.create(createSeller);
+        const result = await testSellerService.signUp(createSeller);
         expect(result).toEqual(savedSeller);
         expect(sellerRepositorySaveSpy).toHaveBeenCalledWith(savedSeller);
       } catch (e) {

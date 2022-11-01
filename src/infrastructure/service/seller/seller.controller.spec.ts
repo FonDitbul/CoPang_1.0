@@ -1,10 +1,10 @@
 import { SellerSignUpRequest } from './seller.dto';
 import { SellerController } from './seller.controller';
-import { Seller, TCreateSeller } from '../../../domain/service/seller/seller';
+import { Seller, SellerSignUpInbound } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 
 class MockSellerService implements ISellerService {
-  create(seller: TCreateSeller): Promise<Seller> {
+  signUp(seller: SellerSignUpInbound): Promise<Seller> {
     return Promise.resolve(undefined);
   }
 
@@ -113,7 +113,7 @@ describe('판매자 controller', () => {
         password: savedSeller.password,
       };
 
-      const sellerServiceCreateSpy = jest.spyOn(sellerService, 'create').mockResolvedValue(savedSeller);
+      const sellerServiceCreateSpy = jest.spyOn(sellerService, 'signUp').mockResolvedValue(savedSeller);
 
       try {
         const result = await sellerController.signUp(savedSellerDto);
