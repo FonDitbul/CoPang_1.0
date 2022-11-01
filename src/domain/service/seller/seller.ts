@@ -8,3 +8,5 @@ export type Seller = {
 };
 
 export type SellerSignUpInbound = Pick<Seller, 'userId' | 'ceoName' | 'companyName' | 'password'>;
+
+export type SellerSignUpOutbound = Pick<Seller, 'userId' | 'ceoName' | 'companyName' | 'password'>;
