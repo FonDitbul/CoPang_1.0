@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, HttpException, HttpStatus, Inject, Param, Post } from '@nestjs/common';
-import { CreateSellerRequest } from './seller.dto';
+import { SellerSignUpRequest, SellerSignUpResponse } from './seller.dto';
 import { Seller } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 
@@ -43,15 +43,13 @@ export class SellerController {
   }
 
   @Post('/seller')
-  async create(@Body() createSellerRequest: CreateSellerRequest) {
-    const oneSeller = await this.sellerService.create(createSellerRequest);
-    type TSellerResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>;
-    const response: TSellerResponse = {
-      userId: oneSeller.userId,
-      ceoName: oneSeller.ceoName,
-      companyName: oneSeller.companyName,
+  async signUp(@Body() sellerSignUpRequest: SellerSignUpRequest) {
+    const signUpSeller = await this.sellerService.create(sellerSignUpRequest);
+    const response: SellerSignUpResponse = {
+      userId: signUpSeller.userId,
+      ceoName: signUpSeller.ceoName,
+      companyName: signUpSeller.companyName,
     };
-
     return response;
   }
 

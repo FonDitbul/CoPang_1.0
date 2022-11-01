@@ -1,4 +1,4 @@
-import { CreateSellerRequest } from './seller.dto';
+import { SellerSignUpRequest } from './seller.dto';
 import { SellerController } from './seller.controller';
 import { Seller, TCreateSeller } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
@@ -106,7 +106,7 @@ describe('판매자 controller', () => {
         password: 'testPassword',
         deletedAt: null,
       };
-      const savedSellerDto: CreateSellerRequest = {
+      const savedSellerDto: SellerSignUpRequest = {
         userId: savedSeller.userId,
         ceoName: savedSeller.ceoName,
         companyName: savedSeller.companyName,
@@ -116,7 +116,7 @@ describe('판매자 controller', () => {
       const sellerServiceCreateSpy = jest.spyOn(sellerService, 'create').mockResolvedValue(savedSeller);
 
       try {
-        const result = await sellerController.create(savedSellerDto);
+        const result = await sellerController.signUp(savedSellerDto);
         expect(result).toEqual(savedSeller);
         expect(sellerServiceCreateSpy).toBeCalledWith(savedSellerDto);
       } catch (e) {

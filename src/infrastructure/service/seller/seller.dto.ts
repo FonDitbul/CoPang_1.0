@@ -1,6 +1,7 @@
-import { IsString, IsInt } from 'class-validator';
+import { IsString } from 'class-validator';
+import { Seller } from "../../../domain/service/seller/seller";
 
-export class CreateSellerRequest {
+export class SellerSignUpRequest {
   @IsString()
   userId: string;
 
@@ -13,3 +14,5 @@ export class CreateSellerRequest {
   @IsString()
   password: string;
 }
+
+export type SellerSignUpResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>;
