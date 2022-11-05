@@ -1,6 +1,6 @@
 import { CreateSellerRequest } from './seller.dto';
 import { SellerController } from './seller.controller';
-import { ISignInSeller, Seller, TCreateSeller } from '../../../domain/service/seller/seller';
+import { ISellerSignInIn, Seller, TCreateSeller } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 import { IAuthService } from '../../../domain/service/auth/auth.service';
 import { IPasswordEncryptor } from '../../../domain/service/auth/encrypt/password.encryptor';
@@ -24,7 +24,7 @@ class MockSellerService implements ISellerService {
     return Promise.resolve(undefined);
   }
 
-  signIn(signInSeller: ISignInSeller): Promise<Seller> {
+  signIn(signInSeller: ISellerSignInIn): Promise<Seller> {
     return Promise.resolve(undefined);
   }
 
