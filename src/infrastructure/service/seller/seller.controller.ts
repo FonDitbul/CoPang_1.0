@@ -49,7 +49,7 @@ export class SellerController {
   async signUp(@Body() request: TSellerSignUpRequest) {
     const sellerSignUpInbound: TSellerSignUpIn = {
       ...request,
-    }
+    };
     const createdSeller = await this.sellerService.signUp(sellerSignUpInbound);
     const response: TSellerSignUpResponse = {
       userId: createdSeller.userId,

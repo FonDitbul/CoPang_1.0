@@ -1,7 +1,7 @@
 import { MockProxy, mock, any } from 'jest-mock-extended'
 import { SellerService } from './seller.service';
 import { ISellerRepository } from '../../../domain/service/seller/seller.repository';
-import { Seller } from '../../../domain/service/seller/seller';
+import { Seller, ISellerSignInIn } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 import { IPasswordEncryptor } from "../../../domain/service/auth/encrypt/password.encryptor";
 
@@ -18,6 +18,10 @@ describe('seller service test ', () => {
     password: 'testPassword',
     deletedAt: null,
   }
+
+  const testPassword = 'copang1234';
+  const testEncryptPassword = '$2b$08$iPMAVTLO0m1dOSREKqM2ouhTTb2LuIwkaziePr0VTReZPW9BRVIda';
+
 
   describe('판매자 회원가입 테스트', () => {
     const givenSignInSeller = {
@@ -174,6 +178,145 @@ describe('seller service test ', () => {
       } catch (e) {
         // console.error(e);
       }
+    });
+  });
+
+  describe('로그인 ', () => {
+    test('로그인이 성공한 경우 ', async () => {
+      const signInSeller: Seller = {
+        id: 1,
+        userId: 'SellerTest',
+        ceoName: 'testCEO',
+        companyName: 'testCompany',
+        password: testEncryptPassword,
+        deletedAt: null,
+      };
+
+      const signInInSeller: ISellerSignInIn = {
+        userId: 'SellerTest',
+        password: testPassword,
+      };
+
+      const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockResolvedValue(signInSeller);
+      const authServiceSignInSpy = jest.spyOn(authService, 'signIn').mockResolvedValue(true);
+
+      const result = await sut.signIn(signInInSeller);
+
+      expect(result).toEqual(signInSeller);
+      expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(signInInSeller.userId);
+      expect(authServiceSignInSpy).toHaveBeenCalledWith(signInInSeller.password, testEncryptPassword);
+    });
+
+    test('Database에 아이디가 존재하지 않아 로그인이 실패한 경우  ', async () => {
+      const signInInSeller: ISellerSignInIn = {
+        userId: 'SellerTestNotIn',
+        password: testPassword,
+      };
+
+      const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockResolvedValue(null);
+
+      const result = await sut.signIn(signInInSeller);
+
+      expect(result).toEqual(null);
+      expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(signInInSeller.userId);
+    });
+
+    test('삭제된 유저가 로그인 한 경우 ', async () => {
+      const signInSeller: Seller = {
+        id: 1,
+        userId: 'SellerTest',
+        ceoName: 'testCEO',
+        companyName: 'testCompany',
+        password: testEncryptPassword,
+        deletedAt: new Date(),
+      };
+
+      const signInInSeller: ISellerSignInIn = {
+        userId: 'SellerTestNotIn',
+        password: testPassword,
+      };
+
+      const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockResolvedValue(signInSeller);
+
+      const result = await sut.signIn(signInInSeller);
+
+      expect(result).toEqual(null);
+      expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(signInInSeller.userId);
+    });
+
+    test('비밀번호가 일치하지 않아 로그인이 실패한 경우', async () => {
+      const notPassword = 'cop';
+      const signInSeller: Seller = {
+        id: 1,
+        userId: 'SellerTest',
+        ceoName: 'testCEO',
+        companyName: 'testCompany',
+        password: testEncryptPassword,
+        deletedAt: null,
+      };
+
+      const signInInSeller: ISellerSignInIn = {
+        userId: 'SellerTest',
+        password: notPassword,
+      };
+
+      const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockResolvedValue(signInSeller);
+      const authServiceSignInSpy = jest.spyOn(authService, 'signIn').mockResolvedValue(false);
+
+      const result = await sut.signIn(signInInSeller);
+
+      expect(result).toEqual(null);
+      expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(signInInSeller.userId);
+      expect(authServiceSignInSpy).toHaveBeenCalledWith(signInInSeller.password, testEncryptPassword);
+    });
+  });
+
+  describe('로그아웃 ', () => {
+    const signOutSellerUserId = 'SellerSignOut';
+
+    test('로그아웃 성공', async () => {
+      const signOutSeller: Seller = {
+        id: 1,
+        userId: signOutSellerUserId,
+        ceoName: 'testCEO',
+        companyName: 'testCompany',
+        password: testEncryptPassword,
+        deletedAt: null,
+      };
+
+      const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockResolvedValue(signOutSeller);
+
+      const result = await sut.signOut(signOutSellerUserId);
+
+      expect(result).toEqual(true);
+      expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(signOutSellerUserId);
+    });
+
+    test('회원 탈퇴한 유저인 경우', async () => {
+      const signOutSeller: Seller = {
+        id: 1,
+        userId: signOutSellerUserId,
+        ceoName: 'testCEO',
+        companyName: 'testCompany',
+        password: testEncryptPassword,
+        deletedAt: new Date(),
+      };
+
+      const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockResolvedValue(signOutSeller);
+
+      const result = await sut.signOut(signOutSellerUserId);
+
+      expect(result).toEqual(null);
+      expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(signOutSellerUserId);
+    });
+
+    test('존재하지 않는 userId가 로그아웃 한 경우 ', async () => {
+      const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockResolvedValue(null);
+
+      const result = await sut.signOut(signOutSellerUserId);
+
+      expect(result).toEqual(null);
+      expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(signOutSellerUserId);
     });
   });
 });
