@@ -7,6 +7,6 @@ export type Seller = {
   deletedAt: Date | null;
 };
 
-export type SellerSignUpIn = Pick<Seller, 'userId' | 'ceoName' | 'companyName' | 'password'>;
+export type TSellerSignUpIn = Pick<Seller, 'userId' | 'ceoName' | 'companyName' | 'password'>;
 
-export type SellerSignUpOut = Pick<Seller, 'userId' | 'ceoName' | 'companyName' | 'password'>;
+export type TSellerSignUpOut = Pick<Seller, 'userId' | 'ceoName' | 'companyName' | 'password'>;
