@@ -1,10 +1,10 @@
 import { SellerSignUpRequest } from './seller.dto';
 import { SellerController } from './seller.controller';
-import { Seller, SellerSignUpInbound } from '../../../domain/service/seller/seller';
+import { Seller, SellerSignUpIn } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 
 class MockSellerService implements ISellerService {
-  signUp(seller: SellerSignUpInbound): Promise<Seller> {
+  signUp(seller: SellerSignUpIn): Promise<Seller> {
     return Promise.resolve(undefined);
   }
 
