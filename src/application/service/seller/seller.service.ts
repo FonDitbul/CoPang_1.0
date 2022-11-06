@@ -31,11 +31,11 @@ export class SellerService implements ISellerService {
       throw Error("이미 등록된 판매자 아이디")
     }
 
-    const sellerSignUpOutbound: TSellerSignUpOut = {
+    const sellerSignUpOut: TSellerSignUpOut = {
       ...sellerSignUpIn,
       password: await this.passwordEncryptor.encrypt(sellerSignUpIn.password),
     }
-    return await this.sellerRepository.signUp(sellerSignUpOutbound);
+    return await this.sellerRepository.signUp(sellerSignUpOut);
   }
 
   async delete(userId: string): Promise<Seller> {
