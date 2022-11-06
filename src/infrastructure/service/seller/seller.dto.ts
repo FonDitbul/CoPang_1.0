@@ -1,17 +1,22 @@
-import { IsString } from 'class-validator';
+import { IsString, IsNotEmpty, Matches } from 'class-validator';
 import { Seller } from "../../../domain/service/seller/seller";
 
 export class SellerSignUpRequest {
   @IsString()
+  @IsNotEmpty()
   userId: string;
 
   @IsString()
+  @IsNotEmpty()
   ceoName: string;
 
   @IsString()
+  @IsNotEmpty()
   companyName: string;
 
   @IsString()
+  @IsNotEmpty()
+  @Matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$")
   password: string;
 }
 
