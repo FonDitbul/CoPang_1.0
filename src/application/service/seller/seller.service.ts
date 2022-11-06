@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Seller, SellerSignUpIn, SellerSignUpOut } from '../../../domain/service/seller/seller';
+import { Seller, TSellerSignUpIn, TSellerSignUpOut } from '../../../domain/service/seller/seller';
 import { ISellerRepository } from '../../../domain/service/seller/seller.repository';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 import { IPasswordEncryptor } from "../../../domain/service/auth/encrypt/password.encryptor";
@@ -25,13 +25,13 @@ export class SellerService implements ISellerService {
     return allSeller;
   }
 
-  async signUp(sellerSignUpIn: SellerSignUpIn): Promise<Seller> {
+  async signUp(sellerSignUpIn: TSellerSignUpIn): Promise<Seller> {
     const sellerWithSameUserId = await this.sellerRepository.findOne(sellerSignUpIn.userId);
     if (sellerWithSameUserId !== null) {
       throw Error("이미 등록된 판매자 아이디")
     }
 
-    const sellerSignUpOutbound: SellerSignUpOut = {
+    const sellerSignUpOutbound: TSellerSignUpOut = {
       ...sellerSignUpIn,
       password: await this.passwordEncryptor.encrypt(sellerSignUpIn.password),
     }

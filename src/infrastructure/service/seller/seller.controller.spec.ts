@@ -1,10 +1,10 @@
-import { SellerSignUpRequest } from './seller.dto';
+import { TSellerSignUpRequest } from './seller.dto';
 import { SellerController } from './seller.controller';
-import { Seller, SellerSignUpIn } from '../../../domain/service/seller/seller';
+import { Seller, TSellerSignUpIn } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 
 class MockSellerService implements ISellerService {
-  signUp(seller: SellerSignUpIn): Promise<Seller> {
+  signUp(seller: TSellerSignUpIn): Promise<Seller> {
     return Promise.resolve(undefined);
   }
 
@@ -106,7 +106,7 @@ describe('판매자 controller', () => {
         password: 'testPassword',
         deletedAt: null,
       };
-      const savedSellerDto: SellerSignUpRequest = {
+      const savedSellerDto: TSellerSignUpRequest = {
         userId: savedSeller.userId,
         ceoName: savedSeller.ceoName,
         companyName: savedSeller.companyName,

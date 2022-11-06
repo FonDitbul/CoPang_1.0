@@ -1,7 +1,7 @@
 import { IsString, IsNotEmpty, Matches } from 'class-validator';
 import { Seller } from "../../../domain/service/seller/seller";
 
-export class SellerSignUpRequest {
+export class TSellerSignUpRequest {
   @IsString()
   @IsNotEmpty()
   userId: string;
@@ -20,4 +20,4 @@ export class SellerSignUpRequest {
   password: string;
 }
 
-export type SellerSignUpResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>;
+export type TSellerSignUpResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>;
