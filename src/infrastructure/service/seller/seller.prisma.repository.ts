@@ -20,7 +20,7 @@ export class SellerPrismaRepository implements ISellerRepository {
     return await this.prisma.seller.findMany({});
   }
 
-  async create(sellerSignUpOutbound: SellerSignUpOut): Promise<SellerEntity> {
+  async signUp(sellerSignUpOutbound: SellerSignUpOut): Promise<SellerEntity> {
     return await this.prisma.seller.create({
       data: {
         userId: sellerSignUpOutbound.userId,

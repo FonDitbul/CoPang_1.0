@@ -40,7 +40,7 @@ describe('seller service test ', () => {
     test('주어진 아이디로 회원가입한 판매자가 존재하지 않을 경우 비밀번호가 암호화되어 정상적으로 등록된다.', async () => {
       const givenEncryptedPassword = "someEncryptedPassword"
       sellerRepository.findOne.calledWith(any()).mockResolvedValue(null);
-      sellerRepository.create.calledWith(any()).mockResolvedValue(givenSeller);
+      sellerRepository.signUp.calledWith(any()).mockResolvedValue(givenSeller);
       passwordEncryptor.encrypt.calledWith(any()).mockResolvedValue(givenEncryptedPassword)
       const expectedSavedSeller = {
         ...givenSignInSeller,
@@ -49,7 +49,7 @@ describe('seller service test ', () => {
 
       const actualSeller = await sut.signUp(givenSignInSeller);
 
-      expect(sellerRepository.create).toHaveBeenCalledWith(expectedSavedSeller);
+      expect(sellerRepository.signUp).toHaveBeenCalledWith(expectedSavedSeller);
       expect(actualSeller.userId).toEqual(givenSeller.userId);
       expect(actualSeller.ceoName).toEqual(givenSeller.ceoName);
       expect(actualSeller.companyName).toEqual(givenSeller.companyName);

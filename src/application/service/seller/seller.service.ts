@@ -35,7 +35,7 @@ export class SellerService implements ISellerService {
       ...sellerSignUpIn,
       password: await this.passwordEncryptor.encrypt(sellerSignUpIn.password),
     }
-    return await this.sellerRepository.create(sellerSignUpOutbound);
+    return await this.sellerRepository.signUp(sellerSignUpOutbound);
   }
 
   async delete(userId: string): Promise<Seller> {
