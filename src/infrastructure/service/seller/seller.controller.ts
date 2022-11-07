@@ -1,11 +1,25 @@
 import { Body, Controller, Delete, Get, HttpException, HttpStatus, Inject, Param, Post } from '@nestjs/common';
-import { CreateSellerRequest } from './seller.dto';
-import { Seller } from '../../../domain/service/seller/seller';
+import { CreateSellerRequest, FindSellerRequest, FindSellerResponse } from './seller.dto';
+import {Seller, TSellerFindIn, TSellerFindOut} from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 
 @Controller()
 export class SellerController {
   constructor(@Inject('ISellerService') private sellerService: ISellerService) {}
+
+  @Get('/seller/:userId')
+  async findUserInfo(@Body() request: FindSellerRequest) {
+    const targetSellerInfo: TSellerFindIn = {
+      ...request,
+    }
+    const resultSellerInfo: TSellerFindOut = await this.sellerService.findUserInfo(targetSellerInfo);
+    const response: FindSellerResponse = {
+      userId: resultSellerInfo.userId,
+      ceoName: resultSellerInfo.ceoName,
+      companyName: resultSellerInfo.companyName,
+    };
+    return response;
+  }
 
   @Get('/seller')
   async getAll() {

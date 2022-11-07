@@ -1,9 +1,13 @@
 import { SellerService } from './seller.service';
 import { ISellerRepository } from '../../../domain/service/seller/seller.repository';
-import { Seller, TCreateSeller } from '../../../domain/service/seller/seller';
+import { Seller, TSellerFindIn, TCreateSeller, TSellerFindOut } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 
 class MockSellerRepository implements ISellerRepository {
+  findUserInfo(seller: TSellerFindIn): Promise<Seller> {
+    return Promise.resolve(undefined);
+  }
+
   create(seller: TCreateSeller): Promise<Seller> {
     return Promise.resolve(undefined);
   }
@@ -28,6 +32,41 @@ describe('seller service test ', () => {
   beforeEach(async () => {
     sellerRepository = new MockSellerRepository();
     testSellerService = new SellerService(sellerRepository);
+  });
+
+  describe('판매자 정보조회', () => {
+    test('패스워드 일치', async () => {
+
+      const requestInfo: TSellerFindIn = {
+        userId: "testUserId",
+        password: "testPassword"
+      }
+
+      const responseInfo: TSellerFindOut = {
+        userId: "testUserId",
+        password: "testPassword",
+        ceoName: "someGuy",
+        companyName: "someCompany"
+      }
+
+      const responseRepo: Seller = {
+        id: 1,
+        userId: 'test',
+        ceoName: 'testCEO',
+        companyName: 'testCompany',
+        password: 'testPassword',
+        deletedAt: null,
+      }
+
+      const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findUserInfo').mockResolvedValue(responseRepo);
+      try {
+        const result: TSellerFindOut = await testSellerService.findUserInfo(requestInfo);
+        expect(result).toEqual(responseInfo);
+        expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(requestInfo);
+      } catch (e) {
+        // console.error(e);
+      }
+    });
   });
 
   describe('판매자 회원가입', () => {
