@@ -5,9 +5,6 @@ import { IPasswordEncryptor } from '../../../domain/service/auth/encrypt/passwor
 @Injectable()
 export class AuthService implements IAuthService {
   constructor(@Inject('IPasswordEncryptor') private passwordBcryptEncryptor: IPasswordEncryptor) {}
-  login(): Promise<void> {
-    return;
-  }
 
   async signIn(rawPassword: string, hashedPassword: string): Promise<boolean> {
     const compared = await this.passwordBcryptEncryptor.compare(rawPassword, hashedPassword);
