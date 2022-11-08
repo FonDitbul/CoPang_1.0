@@ -49,20 +49,19 @@ export class SellerService implements ISellerService {
   }
 
   async signIn(seller: ISellerSignInIn) {
-    // 1. user Id를 통해 seller 정보 가져오기
     const oneSeller = await this.sellerRepository.findOne(seller.userId);
     if (!oneSeller || oneSeller.deletedAt) {
       return null;
     }
 
-    // 2. password 가 일치하는지 판단
-    const comparePassword = await this.authService.signIn(seller.password, oneSeller.password);
+    const comparePassword = await this.passwordEncryptor.compare(seller.password, oneSeller.password);
     if (!comparePassword) {
       return null;
     }
 
     return oneSeller;
   }
+
   async signOut(userId: string) {
     const oneSeller = await this.sellerRepository.findOne(userId);
     if (!oneSeller || oneSeller.deletedAt) {
