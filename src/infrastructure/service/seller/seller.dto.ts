@@ -21,3 +21,5 @@ export class TSellerSignUpRequest {
 }
 
 export type TSellerSignUpResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>;
+
+export type TSellerLeaveResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>;

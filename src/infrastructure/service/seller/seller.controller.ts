@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, HttpException, HttpStatus, Inject, Param, Post } from '@nestjs/common';
-import { TSellerSignUpRequest, TSellerSignUpResponse } from './seller.dto';
+import { TSellerLeaveResponse, TSellerSignUpRequest, TSellerSignUpResponse } from './seller.dto';
 import { Seller, TSellerSignUpIn } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 
@@ -57,13 +57,12 @@ export class SellerController {
   }
 
   @Delete('/seller/:userId')
-  async delete(@Param('userId') userId: string) {
-    const oneSeller = await this.sellerService.delete(userId);
-    type TSellerResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>;
-    const response: TSellerResponse = {
-      userId: oneSeller.userId,
-      ceoName: oneSeller.ceoName,
-      companyName: oneSeller.companyName,
+  async leave(@Param('userId') userId: string) {
+    const leavedSeller = await this.sellerService.leave(userId);
+    const response: TSellerLeaveResponse = {
+      userId: leavedSeller.userId,
+      ceoName: leavedSeller.ceoName,
+      companyName: leavedSeller.companyName,
     };
     return response;
   }

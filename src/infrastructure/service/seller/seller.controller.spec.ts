@@ -8,7 +8,7 @@ class MockSellerService implements ISellerService {
     return Promise.resolve(undefined);
   }
 
-  delete(userId: string): Promise<Seller> {
+  leave(userId: string): Promise<Seller> {
     return Promise.resolve(undefined);
   }
 
@@ -135,10 +135,10 @@ describe('판매자 controller', () => {
         deletedAt: new Date(),
       };
 
-      const sellerServiceDeleteSpy = jest.spyOn(sellerService, 'delete').mockResolvedValue(deletedSeller);
+      const sellerServiceDeleteSpy = jest.spyOn(sellerService, 'leave').mockResolvedValue(deletedSeller);
 
       try {
-        const result = await sellerController.delete(deletedSeller.userId);
+        const result = await sellerController.leave(deletedSeller.userId);
         expect(result).toEqual(deletedSeller);
         // expect(result.deletedAt).toBeInstanceOf(Date);
         expect(sellerServiceDeleteSpy).toHaveBeenCalledWith(deletedSeller);
