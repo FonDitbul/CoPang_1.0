@@ -1,4 +1,4 @@
-import { IsString, IsInt } from 'class-validator';
+import { IsString, IsNotEmpty } from 'class-validator';
 
 export class CreateSellerRequest {
   @IsString()
@@ -14,10 +14,12 @@ export class CreateSellerRequest {
   password: string;
 }
 
-export class SellerSignInIn {
+export class SellerSignInRequest {
   @IsString()
+  @IsNotEmpty()
   userId: string;
 
   @IsString()
+  @IsNotEmpty()
   password: string;
 }
