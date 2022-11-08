@@ -22,8 +22,9 @@ export class TSellerSignUpRequest {
 
 export type TSellerSignUpResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>;
 
-export class SellerSignInIn {
+export class SellerSignInRequest {
   @IsString()
+  @IsNotEmpty()
   userId: string;
 
   @IsString()
