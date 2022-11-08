@@ -1,37 +1,15 @@
 import { SellerService } from './seller.service';
 import { ISellerRepository } from '../../../domain/service/seller/seller.repository';
-import { ISellerSignInIn, Seller, TCreateSeller } from '../../../domain/service/seller/seller';
+import { ISellerSignInIn, Seller } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 import { IAuthService } from '../../../domain/service/auth/auth.service';
 import { IPasswordEncryptor } from '../../../domain/service/auth/encrypt/password.encryptor';
-import { PasswordBcryptEncryptor } from '../auth/encrypt/password.bcrypt.encryptor';
-import { AuthService } from '../auth/auth.service';
-import { sign } from 'crypto';
 import { mock, MockProxy } from 'jest-mock-extended';
-
-class MockSellerRepository implements ISellerRepository {
-  create(seller: TCreateSeller): Promise<Seller> {
-    return Promise.resolve(undefined);
-  }
-
-  delete(userId: string): Promise<Seller> {
-    return Promise.resolve(undefined);
-  }
-
-  findAll(): Promise<Seller[]> {
-    return Promise.resolve([]);
-  }
-
-  findOne(userId: string): Promise<Seller> {
-    return Promise.resolve(undefined);
-  }
-}
 
 describe('seller service test ', () => {
   const sellerRepository: MockProxy<ISellerRepository> = mock<ISellerRepository>();
   const passwordEncryptor: MockProxy<IPasswordEncryptor> = mock<IPasswordEncryptor>();
-  const authService: MockProxy<IAuthService> = mock<IAuthService>();
-  const testSellerService: ISellerService = new SellerService(sellerRepository, authService); // System Under Test
+  const testSellerService: ISellerService = new SellerService(sellerRepository, passwordEncryptor); // System Under Test
 
   const testPassword = 'copang1234';
   const testEncryptPassword = '$2b$08$iPMAVTLO0m1dOSREKqM2ouhTTb2LuIwkaziePr0VTReZPW9BRVIda';
@@ -161,6 +139,7 @@ describe('seller service test ', () => {
         // console.error(e);
       }
     });
+
     test('유저 삭제 성공', async () => {
       // 유저 삭제
       const deletedSeller: Seller = {
@@ -185,8 +164,8 @@ describe('seller service test ', () => {
     });
   });
 
-  describe('로그인 ', () => {
-    test('로그인이 성공한 경우 ', async () => {
+  describe('판매자 로그인 테스트', () => {
+    test('유저 아이디 존재 비밀번호 일치 로그인이 성공하여 유저 정보를 리턴한 경우', async () => {
       const signInSeller: Seller = {
         id: 1,
         userId: 'SellerTest',
@@ -202,16 +181,16 @@ describe('seller service test ', () => {
       };
 
       const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockResolvedValue(signInSeller);
-      const authServiceSignInSpy = jest.spyOn(authService, 'signIn').mockResolvedValue(true);
+      const passwordEncryptorSpy = jest.spyOn(passwordEncryptor, 'compare').mockResolvedValue(true);
 
       const result = await testSellerService.signIn(signInInSeller);
 
       expect(result).toEqual(signInSeller);
       expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(signInInSeller.userId);
-      expect(authServiceSignInSpy).toHaveBeenCalledWith(signInInSeller.password, testEncryptPassword);
+      expect(passwordEncryptorSpy).toHaveBeenCalledWith(signInInSeller.password, testEncryptPassword);
     });
 
-    test('Database에 아이디가 존재하지 않아 로그인이 실패한 경우  ', async () => {
+    test('판매자 아이디 존재 하지 않아 로그인 실패 경우', async () => {
       const signInInSeller: ISellerSignInIn = {
         userId: 'SellerTestNotIn',
         password: testPassword,
@@ -225,7 +204,7 @@ describe('seller service test ', () => {
       expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(signInInSeller.userId);
     });
 
-    test('삭제된 유저가 로그인 한 경우 ', async () => {
+    test('판매자 아이디가 존재하지만, 삭제된 유저 가 로그인을 시도하여 로그인이 실패한 경우', async () => {
       const signInSeller: Seller = {
         id: 1,
         userId: 'SellerTest',
@@ -248,7 +227,7 @@ describe('seller service test ', () => {
       expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(signInInSeller.userId);
     });
 
-    test('비밀번호가 일치하지 않아 로그인이 실패한 경우', async () => {
+    test('유저 아이디 존재, 삭제하지 않은 유저이지만 비밀번호가 일치 하지 않아 로그인이 실패한 경우', async () => {
       const notPassword = 'cop';
       const signInSeller: Seller = {
         id: 1,
@@ -265,20 +244,20 @@ describe('seller service test ', () => {
       };
 
       const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockResolvedValue(signInSeller);
-      const authServiceSignInSpy = jest.spyOn(authService, 'signIn').mockResolvedValue(false);
+      const passwordEncryptorSpy = jest.spyOn(passwordEncryptor, 'compare').mockResolvedValue(false);
 
       const result = await testSellerService.signIn(signInInSeller);
 
       expect(result).toEqual(null);
       expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(signInInSeller.userId);
-      expect(authServiceSignInSpy).toHaveBeenCalledWith(signInInSeller.password, testEncryptPassword);
+      expect(passwordEncryptorSpy).toHaveBeenCalledWith(signInInSeller.password, testEncryptPassword);
     });
   });
 
-  describe('로그아웃 ', () => {
+  describe('로그아웃 테스트', () => {
     const signOutSellerUserId = 'SellerSignOut';
 
-    test('로그아웃 성공', async () => {
+    test('유저 아이디가 존재, 삭제하지 않은 유저, 로그아웃이 성공한 경우', async () => {
       const signOutSeller: Seller = {
         id: 1,
         userId: signOutSellerUserId,
@@ -296,7 +275,7 @@ describe('seller service test ', () => {
       expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(signOutSellerUserId);
     });
 
-    test('회원 탈퇴한 유저인 경우', async () => {
+    test('유저 아이디가 존재하지만 유저 정보를 삭제하여 로그아웃이 실패한 경우', async () => {
       const signOutSeller: Seller = {
         id: 1,
         userId: signOutSellerUserId,
@@ -314,7 +293,7 @@ describe('seller service test ', () => {
       expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(signOutSellerUserId);
     });
 
-    test('존재하지 않는 userId가 로그아웃 한 경우 ', async () => {
+    test('존재하지 않는 유저 아이디로 로그아웃이 실패한 경우 ', async () => {
       const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockResolvedValue(null);
 
       const result = await testSellerService.signOut(signOutSellerUserId);
