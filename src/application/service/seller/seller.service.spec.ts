@@ -30,11 +30,9 @@ describe('seller service test ', () => {
     test('주어진 아이디로 이미 회원가입한 판매자가 존재할 경우 에러가 발생한다.', async () => {
       sellerRepository.findOne.calledWith(givenSeller.userId).mockResolvedValue(givenSeller);
 
-      try {
+      await expect(async () => {
         await sut.signUp(givenSignInSeller);
-      } catch (e) {
-        expect(e.message).toEqual("이미 등록된 판매자 아이디");
-      }
+      }).rejects.toThrowError(new Error("이미 등록된 판매자 아이디"));
     });
 
     test('주어진 아이디로 회원가입한 판매자가 존재하지 않을 경우 비밀번호가 암호화되어 정상적으로 등록된다.', async () => {
@@ -138,11 +136,9 @@ describe('seller service test ', () => {
 
       sellerRepository.findOne.calledWith(givenNoSellerUserId).mockResolvedValue(null);
 
-      try {
-        await sut.leave(givenNoSellerUserId);
-      } catch (e) {
-        expect(e.message).toEqual("판매자 아이디에 해당하는 판매자 정보 존재하지 않음");
-      }
+      await expect(async () => {
+        await sut.leave(givenNoSellerUserId)
+      }).rejects.toThrowError(new Error("판매자 아이디에 해당하는 판매자 정보 존재하지 않음"));
     });
 
     test('아이디로 판매자를 조회했을 때 삭제 일자가 존재한다면, 이미 탈퇴한 판매자이므로 에러를 던진다.', async () => {
@@ -155,11 +151,9 @@ describe('seller service test ', () => {
 
       sellerRepository.findOne.calledWith(givenSellerUserId).mockResolvedValue(deletedSeller);
 
-      try {
+      await expect(async () => {
         await sut.leave(deletedSeller.userId);
-      } catch (e) {
-        expect(e.message).toEqual("이미 삭제된 판매자");
-      }
+      }).rejects.toThrowError(new Error("이미 삭제된 판매자"));
     });
 
     test('아이디로 판매자를 조회했을 때 삭제 일자가 존재하지 않는다면 삭제 처리를 진행하고 삭제 일자가 저장된다', async () => {
