@@ -1,11 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Seller, TCreateSeller, TSellerFindIn, TSellerFindOut } from '../../../domain/service/seller/seller';
+import { Seller, TSellerSignUpIn, TSellerSignUpOut, TSellerFindIn, TSellerFindOut } from '../../../domain/service/seller/seller';
 import { ISellerRepository } from '../../../domain/service/seller/seller.repository';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
+import { IPasswordEncryptor } from "../../../domain/service/auth/encrypt/password.encryptor";
 
 @Injectable()
 export class SellerService implements ISellerService {
-  constructor(@Inject('ISellerRepository') private sellerRepository: ISellerRepository) {}
+  constructor(
+      @Inject('ISellerRepository') private sellerRepository: ISellerRepository,
+      @Inject('IPasswordEncryptor') private passwordEncryptor: IPasswordEncryptor,
+  ) {}
 
   async findUserInfo(sellerIn: TSellerFindIn): Promise<TSellerFindOut> {
     const sellerInfo: Seller = await this.sellerRepository.findUserInfo(sellerIn);
@@ -43,9 +47,17 @@ export class SellerService implements ISellerService {
     return allSeller;
   }
 
-  async create(createSellerDto: TCreateSeller): Promise<Seller> {
-    const oneSeller = await this.sellerRepository.create(createSellerDto);
-    return oneSeller;
+  async signUp(sellerSignUpIn: TSellerSignUpIn): Promise<Seller> {
+    const sellerWithSameUserId = await this.sellerRepository.findOne(sellerSignUpIn.userId);
+    if (sellerWithSameUserId !== null) {
+      throw Error("이미 등록된 판매자 아이디")
+    }
+
+    const sellerSignUpOut: TSellerSignUpOut = {
+      ...sellerSignUpIn,
+      password: await this.passwordEncryptor.encrypt(sellerSignUpIn.password),
+    }
+    return await this.sellerRepository.signUp(sellerSignUpOut);
   }
 
   async delete(userId: string): Promise<Seller> {

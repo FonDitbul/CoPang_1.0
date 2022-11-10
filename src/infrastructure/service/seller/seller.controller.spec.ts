@@ -1,14 +1,15 @@
-import { CreateSellerRequest } from './seller.dto';
+import { TSellerSignUpRequest } from './seller.dto';
 import { SellerController } from './seller.controller';
-import { Seller, TSellerFindIn, TCreateSeller, TSellerFindOut } from '../../../domain/service/seller/seller';
+import { Seller, TSellerFindIn, TCreateSeller, TSellerFindOut, TSellerSignUpIn } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
+
 
 class MockSellerService implements ISellerService {
   findUserInfo(seller: TSellerFindIn): Promise<Seller> {
     return Promise.resolve(undefined);
   }
 
-  create(seller: TCreateSeller): Promise<Seller> {
+  signUp(seller: TSellerSignUpIn): Promise<Seller> {
     return Promise.resolve(undefined);
   }
 
@@ -113,17 +114,17 @@ describe('판매자 controller', () => {
         password: 'testPassword',
         deletedAt: null,
       };
-      const savedSellerDto: CreateSellerRequest = {
+      const savedSellerDto: TSellerSignUpRequest = {
         userId: savedSeller.userId,
         ceoName: savedSeller.ceoName,
         companyName: savedSeller.companyName,
         password: savedSeller.password,
       };
 
-      const sellerServiceCreateSpy = jest.spyOn(sellerService, 'create').mockResolvedValue(savedSeller);
+      const sellerServiceCreateSpy = jest.spyOn(sellerService, 'signUp').mockResolvedValue(savedSeller);
 
       try {
-        const result = await sellerController.create(savedSellerDto);
+        const result = await sellerController.signUp(savedSellerDto);
         expect(result).toEqual(savedSeller);
         expect(sellerServiceCreateSpy).toBeCalledWith(savedSellerDto);
       } catch (e) {

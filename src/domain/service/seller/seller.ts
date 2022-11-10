@@ -11,3 +11,6 @@ export type TCreateSeller = Pick<Seller, 'userId' | 'ceoName' | 'companyName' | 
 
 export type TSellerFindIn = Pick<Seller, 'userId' | 'password'>;
 export type TSellerFindOut = Pick<Seller, 'userId' | 'ceoName' | 'companyName' | 'password'>;
+
+export type TSellerSignUpIn = Pick<Seller, 'userId' | 'ceoName' | 'companyName' | 'password'>;
+export type TSellerSignUpOut = Pick<Seller, 'userId' | 'ceoName' | 'companyName' | 'password'>;

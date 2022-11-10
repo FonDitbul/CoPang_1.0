@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpException, HttpStatus, Inject, Param, Post } from '@nestjs/common';
-import { CreateSellerRequest, FindSellerRequest, FindSellerResponse } from './seller.dto';
-import { Seller, TSellerFindIn, TSellerFindOut } from '../../../domain/service/seller/seller';
+import { FindSellerRequest, FindSellerResponse, TSellerSignUpRequest, TSellerSignUpResponse } from './seller.dto';
+import { Seller, TSellerFindIn, TSellerFindOut, TSellerSignUpIn } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 
 @Controller()
@@ -57,15 +57,16 @@ export class SellerController {
   }
 
   @Post('/seller')
-  async create(@Body() createSellerRequest: CreateSellerRequest) {
-    const oneSeller = await this.sellerService.create(createSellerRequest);
-    type TSellerResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>;
-    const response: TSellerResponse = {
-      userId: oneSeller.userId,
-      ceoName: oneSeller.ceoName,
-      companyName: oneSeller.companyName,
+  async signUp(@Body() request: TSellerSignUpRequest) {
+    const sellerSignUpInbound: TSellerSignUpIn = {
+      ...request,
+    }
+    const createdSeller = await this.sellerService.signUp(sellerSignUpInbound);
+    const response: TSellerSignUpResponse = {
+      userId: createdSeller.userId,
+      ceoName: createdSeller.ceoName,
+      companyName: createdSeller.companyName,
     };
-
     return response;
   }
 

@@ -1,7 +1,7 @@
 import { IsString, IsNotEmpty, Matches } from 'class-validator';
 import { Seller } from "../../../domain/service/seller/seller";
 
-export class CreateSellerRequest {
+export class TSellerSignUpRequest {
   @IsString()
   @IsNotEmpty()
   userId: string;
@@ -33,3 +33,4 @@ export class FindSellerRequest {
 
 export type FindSellerResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>
 
+export type TSellerSignUpResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>;
