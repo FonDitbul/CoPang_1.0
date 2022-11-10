@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpException, HttpStatus, Inject, Param, Post } from '@nestjs/common';
 import { CreateSellerRequest, FindSellerRequest, FindSellerResponse } from './seller.dto';
-import {Seller, TSellerFindIn, TSellerFindOut} from '../../../domain/service/seller/seller';
+import { Seller, TSellerFindIn, TSellerFindOut } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 
 @Controller()

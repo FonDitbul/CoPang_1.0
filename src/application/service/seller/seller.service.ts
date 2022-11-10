@@ -1,7 +1,7 @@
-import {Inject, Injectable} from '@nestjs/common';
-import {Seller, TCreateSeller, TSellerFindIn, TSellerFindOut} from '../../../domain/service/seller/seller';
-import {ISellerRepository} from '../../../domain/service/seller/seller.repository';
-import {ISellerService} from '../../../domain/service/seller/seller.service';
+import { Inject, Injectable } from '@nestjs/common';
+import { Seller, TCreateSeller, TSellerFindIn, TSellerFindOut } from '../../../domain/service/seller/seller';
+import { ISellerRepository } from '../../../domain/service/seller/seller.repository';
+import { ISellerService } from '../../../domain/service/seller/seller.service';
 
 @Injectable()
 export class SellerService implements ISellerService {

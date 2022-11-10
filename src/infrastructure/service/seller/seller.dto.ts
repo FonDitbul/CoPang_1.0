@@ -1,5 +1,5 @@
-import {IsString, IsNotEmpty, Matches} from 'class-validator';
-import {Seller} from "../../../domain/service/seller/seller";
+import { IsString, IsNotEmpty, Matches } from 'class-validator';
+import { Seller } from "../../../domain/service/seller/seller";
 
 export class CreateSellerRequest {
   @IsString()

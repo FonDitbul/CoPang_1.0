@@ -1,6 +1,6 @@
 import { CreateSellerRequest } from './seller.dto';
 import { SellerController } from './seller.controller';
-import {Seller, TSellerFindIn, TCreateSeller, TSellerFindOut} from '../../../domain/service/seller/seller';
+import { Seller, TSellerFindIn, TCreateSeller, TSellerFindOut } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 
 class MockSellerService implements ISellerService {
