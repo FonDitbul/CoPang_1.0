@@ -1,6 +1,6 @@
 import { TSellerSignUpRequest } from './seller.dto';
 import { SellerController } from './seller.controller';
-import { Seller, TSellerFindIn, TCreateSeller, TSellerFindOut, TSellerSignUpIn } from '../../../domain/service/seller/seller';
+import { Seller, TSellerFindIn, TSellerFindOut, TSellerSignUpIn } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 
 
