@@ -28,7 +28,7 @@ export class SellerService implements ISellerService {
   async signUp(sellerSignUpIn: TSellerSignUpIn): Promise<Seller> {
     const sellerWithSameUserId = await this.sellerRepository.findOne(sellerSignUpIn.userId);
     if (sellerWithSameUserId !== null) {
-      throw Error("이미 등록된 판매자 아이디")
+      throw Error("이미 등록된 판매자 아이디");
     }
 
     const sellerSignUpOut: TSellerSignUpOut = {
@@ -38,14 +38,15 @@ export class SellerService implements ISellerService {
     return await this.sellerRepository.signUp(sellerSignUpOut);
   }
 
-  async delete(userId: string): Promise<Seller> {
-    const oneSeller = await this.sellerRepository.findOne(userId);
-    if (oneSeller.deletedAt) {
-      console.error('이미 삭제된 유저');
-      return null;
+  async leave(userId: string): Promise<Seller> {
+    const seller = await this.sellerRepository.findOne(userId);
+    if (seller === null) {
+      throw Error("판매자 아이디에 해당하는 판매자 정보 존재하지 않음");
     }
-    const deletedSeller = await this.sellerRepository.delete(userId);
-    return deletedSeller;
+    if (seller.deletedAt) {
+      throw Error("이미 삭제된 판매자");
+    }
+    return await this.sellerRepository.delete(userId);
   }
 
   async signIn(seller: ISellerSignInIn) {

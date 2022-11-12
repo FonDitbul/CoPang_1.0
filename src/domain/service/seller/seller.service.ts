@@ -10,4 +10,5 @@ export interface ISellerService {
   delete: (userId: string) => Promise<Seller>;
   signIn: (signInSeller: ISellerSignInIn) => Promise<Seller>;
   signOut: (userId: string) => Promise<boolean>;
+  leave: (userId: string) => Promise<Seller>;
 }

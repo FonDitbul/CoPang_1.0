@@ -33,11 +33,9 @@ describe('seller service test ', () => {
     test('주어진 아이디로 이미 회원가입한 판매자가 존재할 경우 에러가 발생한다.', async () => {
       sellerRepository.findOne.calledWith(givenSeller.userId).mockResolvedValue(givenSeller);
 
-      try {
+      await expect(async () => {
         await sut.signUp(givenSignInSeller);
-      } catch (e) {
-        expect(e.message).toEqual('이미 등록된 판매자 아이디');
-      }
+      }).rejects.toThrowError(new Error("이미 등록된 판매자 아이디"));
     });
 
     test('주어진 아이디로 회원가입한 판매자가 존재하지 않을 경우 비밀번호가 암호화되어 정상적으로 등록된다.', async () => {
@@ -103,11 +101,10 @@ describe('seller service test ', () => {
         deletedAt: null,
       };
 
-      const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockResolvedValue(savedSeller);
+      const sellerRepositoryFindOneSpy = sellerRepository.findOne.calledWith(savedSeller.userId).mockResolvedValue(savedSeller);
       try {
         const result = await sut.getOne(savedSeller.userId);
         expect(result).toEqual(savedSeller);
-        expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(savedSeller);
       } catch (e) {
         // console.error(e);
       }
@@ -124,7 +121,7 @@ describe('seller service test ', () => {
         deletedAt: new Date(),
       };
 
-      const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockRejectedValue(new Error('deleted seller'));
+      const sellerRepositoryFindOneSpy = sellerRepository.findOne.calledWith(savedSeller.userId).mockResolvedValue(savedSeller);
       try {
         const result = await sut.getOne(savedSeller.userId);
         expect(savedSeller.deletedAt).toBeInstanceOf(Date);
@@ -135,48 +132,51 @@ describe('seller service test ', () => {
     });
   });
 
-  describe('유저 회원 탈퇴 ', () => {
-    test('이미 삭제한 유저', async () => {
-      // 유저 삭제
+  describe('판매자 회원 탈퇴 테스트', () => {
+
+    test('아이디로 판매자를 조회했을 때 판매자 정보가 존재하지 않으면 에러를 던진다.', async () => {
+      const givenNoSellerUserId = "noSellerId"
+
+      sellerRepository.findOne.calledWith(givenNoSellerUserId).mockResolvedValue(null);
+
+      await expect(async () => {
+        await sut.leave(givenNoSellerUserId)
+      }).rejects.toThrowError(new Error("판매자 아이디에 해당하는 판매자 정보 존재하지 않음"));
+    });
+
+    test('아이디로 판매자를 조회했을 때 삭제 일자가 존재한다면, 이미 탈퇴한 판매자이므로 에러를 던진다.', async () => {
+      const givenSellerUserId = givenSeller.userId;
+
       const deletedSeller: Seller = {
-        id: 1,
-        userId: 'test',
-        ceoName: 'testCEO',
-        companyName: 'testCompany',
-        password: 'testPassword',
+        ...givenSeller,
         deletedAt: new Date(),
       };
 
-      const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'delete').mockRejectedValue(new Error('deleted seller'));
+      sellerRepository.findOne.calledWith(givenSellerUserId).mockResolvedValue(deletedSeller);
 
-      try {
-        await sut.delete(deletedSeller.userId);
-        expect(sellerRepositoryFindOneSpy).toThrow();
-      } catch (e) {
-        // console.error(e);
-      }
+      await expect(async () => {
+        await sut.leave(deletedSeller.userId);
+      }).rejects.toThrowError(new Error("이미 삭제된 판매자"));
     });
-    test('유저 삭제 성공', async () => {
-      // 유저 삭제
-      const deletedSeller: Seller = {
-        id: 1,
-        userId: 'test',
-        ceoName: 'testCEO',
-        companyName: 'testCompany',
-        password: 'testPassword',
+
+    test('아이디로 판매자를 조회했을 때 삭제 일자가 존재하지 않는다면 삭제 처리를 진행하고 삭제 일자가 저장된다', async () => {
+      const givenSellerUserId = givenSeller.userId;
+
+      const notDeletedSeller: Seller = {
+        ...givenSeller,
         deletedAt: null,
       };
+      sellerRepository.findOne.calledWith(givenSellerUserId).mockResolvedValue(notDeletedSeller);
 
-      const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'delete').mockResolvedValue(deletedSeller);
+      const afterDeletedSeller: Seller = {
+        ...givenSeller,
+        deletedAt: new Date(),
+      };
+      sellerRepository.delete.calledWith(givenSellerUserId).mockResolvedValue(afterDeletedSeller);
 
-      try {
-        const result = await sut.delete(deletedSeller.userId);
+      const actualResult = await sut.leave(notDeletedSeller.userId);
 
-        expect(result).toEqual(deletedSeller);
-        expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(deletedSeller);
-      } catch (e) {
-        // console.error(e);
-      }
+      expect(actualResult.deletedAt).not.toBeNull()
     });
   });
 
