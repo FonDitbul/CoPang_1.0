@@ -1,5 +1,5 @@
 import { IsString, IsNotEmpty, Matches } from 'class-validator';
-import { Seller } from "../../../domain/service/seller/seller";
+import { Seller } from '../../../domain/service/seller/seller';
 
 export class TSellerSignUpRequest {
   @IsString()
@@ -16,7 +16,7 @@ export class TSellerSignUpRequest {
 
   @IsString()
   @IsNotEmpty()
-  @Matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$")
+  @Matches('^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$')
   password: string;
 }
 
@@ -29,6 +29,8 @@ export class SellerSignInRequest {
 
   @IsString()
   @IsNotEmpty()
-  @Matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$")
+  @Matches('^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$')
   password: string;
 }
+
+export type TSellerSignInResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>;

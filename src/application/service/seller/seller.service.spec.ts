@@ -1,9 +1,9 @@
-import { MockProxy, mock, any } from 'jest-mock-extended'
+import { MockProxy, mock, any } from 'jest-mock-extended';
 import { SellerService } from './seller.service';
 import { ISellerRepository } from '../../../domain/service/seller/seller.repository';
 import { Seller, ISellerSignInIn } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
-import { IPasswordEncryptor } from "../../../domain/service/auth/encrypt/password.encryptor";
+import { IPasswordEncryptor } from '../../../domain/service/auth/encrypt/password.encryptor';
 
 describe('seller service test ', () => {
   const sellerRepository: MockProxy<ISellerRepository> = mock<ISellerRepository>();
@@ -17,11 +17,10 @@ describe('seller service test ', () => {
     companyName: 'testCompany',
     password: 'testPassword',
     deletedAt: null,
-  }
+  };
 
   const testPassword = 'copang1234';
   const testEncryptPassword = '$2b$08$iPMAVTLO0m1dOSREKqM2ouhTTb2LuIwkaziePr0VTReZPW9BRVIda';
-
 
   describe('판매자 회원가입 테스트', () => {
     const givenSignInSeller = {
@@ -29,7 +28,7 @@ describe('seller service test ', () => {
       ceoName: givenSeller.ceoName,
       companyName: givenSeller.companyName,
       password: givenSeller.password,
-    }
+    };
 
     test('주어진 아이디로 이미 회원가입한 판매자가 존재할 경우 에러가 발생한다.', async () => {
       sellerRepository.findOne.calledWith(givenSeller.userId).mockResolvedValue(givenSeller);
@@ -37,19 +36,19 @@ describe('seller service test ', () => {
       try {
         await sut.signUp(givenSignInSeller);
       } catch (e) {
-        expect(e.message).toEqual("이미 등록된 판매자 아이디");
+        expect(e.message).toEqual('이미 등록된 판매자 아이디');
       }
     });
 
     test('주어진 아이디로 회원가입한 판매자가 존재하지 않을 경우 비밀번호가 암호화되어 정상적으로 등록된다.', async () => {
-      const givenEncryptedPassword = "someEncryptedPassword"
+      const givenEncryptedPassword = 'someEncryptedPassword';
       sellerRepository.findOne.calledWith(givenSeller.userId).mockResolvedValue(null);
       sellerRepository.signUp.calledWith(any()).mockResolvedValue(givenSeller);
-      passwordEncryptor.encrypt.calledWith(any()).mockResolvedValue(givenEncryptedPassword)
+      passwordEncryptor.encrypt.calledWith(any()).mockResolvedValue(givenEncryptedPassword);
       const expectedSavedSeller = {
         ...givenSignInSeller,
-        password: givenEncryptedPassword
-      }
+        password: givenEncryptedPassword,
+      };
 
       const actualSeller = await sut.signUp(givenSignInSeller);
 

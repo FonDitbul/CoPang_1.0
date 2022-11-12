@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, HttpException, HttpStatus, Inject, Param, Post, Session, UseGuards, UseInterceptors } from '@nestjs/common';
-import { SellerSignInIn, CreateSellerRequest, SellerSignInRequest, TSellerSignUpRequest, TSellerSignUpResponse,  } from './seller.dto';
+import { SellerSignInRequest, TSellerSignInResponse, TSellerSignUpRequest, TSellerSignUpResponse } from './seller.dto';
 import { Seller, TSellerSignUpIn } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 import { IAuthService } from '../../../domain/service/auth/auth.service';
@@ -74,13 +74,12 @@ export class SellerController {
   @Post('/seller/signIn')
   @UseInterceptors(SessionSignInInterceptor)
   async signIn(@Session() session: Record<string, any>, @Body() signInSellerRequest: SellerSignInRequest) {
-    type TSellerResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>;
     const seller = await this.sellerService.signIn(signInSellerRequest);
     if (!seller) {
       throw new HttpException('UnauthorizedException', HttpStatus.UNAUTHORIZED);
     }
 
-    const response: TSellerResponse = {
+    const response: TSellerSignInResponse = {
       userId: seller.userId,
       ceoName: seller.ceoName,
       companyName: seller.companyName,
