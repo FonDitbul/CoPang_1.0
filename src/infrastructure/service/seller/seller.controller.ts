@@ -1,4 +1,3 @@
-
 import { Body, Controller, Delete, Get, HttpException, HttpStatus, Inject, Param, Post, Session, UseGuards, UseInterceptors } from '@nestjs/common';
 import { TSellerLeaveResponse, SellerSignInRequest, TSellerSignInResponse, TSellerSignUpRequest, TSellerSignUpResponse } from './seller.dto';
 import { Seller, TSellerSignUpIn } from '../../../domain/service/seller/seller';
