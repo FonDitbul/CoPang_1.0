@@ -1,117 +1,14 @@
 import { TSellerSignUpRequest } from './seller.dto';
 import { SellerController } from './seller.controller';
-import { Seller, TSellerSignUpIn, ISellerSignInIn } from '../../../domain/service/seller/seller';
+import { Seller } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
-import { IAuthService } from '../../../domain/service/auth/auth.service';
 import { IPasswordEncryptor } from '../../../domain/service/auth/encrypt/password.encryptor';
-import { PasswordBcryptEncryptor } from '../../../application/service/auth/encrypt/password.bcrypt.encryptor';
-import { AuthService } from '../../../application/service/auth/auth.service';
-
-class MockSellerService implements ISellerService {
-  signUp(seller: TSellerSignUpIn): Promise<Seller> {
-    return Promise.resolve(undefined);
-  }
-
-  leave(userId: string): Promise<Seller> {
-    return Promise.resolve(undefined);
-  }
-
-  getAll(): Promise<Seller[]> {
-    return Promise.resolve([]);
-  }
-
-  getOne(userId: string): Promise<Seller> {
-    return Promise.resolve(undefined);
-  }
-
-  signIn(signInSeller: ISellerSignInIn): Promise<Seller> {
-    return Promise.resolve(undefined);
-  }
-
-  signOut(userId: string): Promise<boolean> {
-    return Promise.resolve(false);
-  }
-}
+import { mock, MockProxy } from 'jest-mock-extended';
 
 describe('판매자 controller', () => {
-  let sellerController: SellerController;
-  let sellerService: ISellerService;
-  let authService: IAuthService;
-  let passwordBcryptEncryptor: IPasswordEncryptor;
+  const sellerService: MockProxy<ISellerService> = mock<ISellerService>();
+  const sut = new SellerController(sellerService); // System Under Test
 
-  beforeEach(async () => {
-    sellerService = new MockSellerService();
-    passwordBcryptEncryptor = new PasswordBcryptEncryptor();
-    authService = new AuthService(passwordBcryptEncryptor);
-    sellerController = new SellerController(sellerService, authService);
-  });
-  describe('/seller/:userId (GET)', () => {
-    test('특정 유저 가져오기 ', async () => {
-      const oneSeller: Seller = {
-        id: 1,
-        userId: 'test',
-        ceoName: 'testCEO',
-        companyName: 'testCompany',
-        password: 'testPassword',
-        deletedAt: null,
-      };
-
-      const sellerServiceGetOneSpy = jest.spyOn(sellerService, 'getOne').mockResolvedValue(oneSeller);
-
-      try {
-        const result = await sellerController.getOne(oneSeller.userId);
-        expect(result).toEqual(oneSeller);
-        expect(sellerServiceGetOneSpy).toHaveBeenCalledWith(oneSeller);
-      } catch (e) {
-        // console.error(e);
-      }
-    });
-    test('삭제된 유저 인 경우 ', async () => {
-      const deletedSeller: Seller = {
-        id: 1,
-        userId: 'test',
-        ceoName: 'testCEO',
-        companyName: 'testCompany',
-        password: 'testPassword',
-        deletedAt: new Date(),
-      };
-
-      const sellerServiceGetOneSpy = jest.spyOn(sellerService, 'getOne').mockResolvedValue(deletedSeller);
-
-      try {
-        const result = await sellerController.getOne(deletedSeller.userId);
-        expect(result.deletedAt).toBeInstanceOf(Date);
-        expect(sellerServiceGetOneSpy).toHaveBeenCalledWith(deletedSeller);
-      } catch (e) {
-        // console.error(e);
-      }
-    });
-  });
-
-  describe('/seller (GET)', () => {
-    it('판매자 Array 전부 가져오기 ', async () => {
-      const savedSellerArray: Seller[] = [
-        {
-          id: 1,
-          userId: 'test',
-          ceoName: 'testCEO',
-          companyName: 'testCompany',
-          password: 'testPassword',
-          deletedAt: null,
-        },
-      ];
-
-      const sellerServiceGetAllSpy = jest.spyOn(sellerService, 'getAll').mockResolvedValue(savedSellerArray);
-
-      try {
-        const result = await sellerController.getAll();
-        expect(result).toEqual(savedSellerArray);
-        expect(sellerServiceGetAllSpy).toHaveBeenCalledWith(savedSellerArray);
-      } catch (e) {
-        // console.error(e);
-      }
-    });
-  });
   describe('/seller/:userId (POST)', () => {
     it('판매자 유저 회원가입 ', async () => {
       const savedSeller: Seller = {
@@ -132,7 +29,7 @@ describe('판매자 controller', () => {
       const sellerServiceCreateSpy = jest.spyOn(sellerService, 'signUp').mockResolvedValue(savedSeller);
 
       try {
-        const result = await sellerController.signUp(savedSellerDto);
+        const result = await sut.signUp(savedSellerDto);
         expect(result).toEqual(savedSeller);
         expect(sellerServiceCreateSpy).toBeCalledWith(savedSellerDto);
       } catch (e) {
@@ -140,6 +37,7 @@ describe('판매자 controller', () => {
       }
     });
   });
+
   describe('/seller/:userId (DELETE)', () => {
     it('판매자 회원 탈퇴', async () => {
       const deletedSeller: Seller = {
@@ -154,7 +52,7 @@ describe('판매자 controller', () => {
       const sellerServiceDeleteSpy = jest.spyOn(sellerService, 'leave').mockResolvedValue(deletedSeller);
 
       try {
-        const result = await sellerController.leave(deletedSeller.userId);
+        const result = await sut.leave(deletedSeller.userId);
         expect(result).toEqual(deletedSeller);
         // expect(result.deletedAt).toBeInstanceOf(Date);
         expect(sellerServiceDeleteSpy).toHaveBeenCalledWith(deletedSeller);

@@ -35,7 +35,7 @@ describe('seller service test ', () => {
 
       await expect(async () => {
         await sut.signUp(givenSignInSeller);
-      }).rejects.toThrowError(new Error("이미 등록된 판매자 아이디"));
+      }).rejects.toThrowError(new Error('이미 등록된 판매자 아이디'));
     });
 
     test('주어진 아이디로 회원가입한 판매자가 존재하지 않을 경우 비밀번호가 암호화되어 정상적으로 등록된다.', async () => {
@@ -57,91 +57,15 @@ describe('seller service test ', () => {
     });
   });
 
-  describe('전체 판매자 가져오기', () => {
-    test('전체 판매자 가져오기', async () => {
-      const savedSellerArray: Seller[] = [
-        {
-          id: 1,
-          userId: 'test',
-          ceoName: 'testCEO',
-          companyName: 'testCompany',
-          password: 'testPassword',
-          deletedAt: null,
-        },
-        {
-          id: 2,
-          userId: 'test2',
-          ceoName: 'testCEO2',
-          companyName: 'testCompany2',
-          password: 'testPassword',
-          deletedAt: null,
-        },
-      ];
-
-      const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findAll').mockResolvedValue(savedSellerArray);
-      try {
-        const result = await sut.getAll();
-        expect(result).toEqual(savedSellerArray);
-        expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(savedSellerArray);
-      } catch (e) {
-        // console.error(e);
-      }
-    });
-  });
-
-  describe('특정 유저 id로 가져오기 ', () => {
-    test('user id 조회 성공', async () => {
-      // 해당 user Id 가져오기
-      const savedSeller: Seller = {
-        id: 1,
-        userId: 'test',
-        ceoName: 'testCEO',
-        companyName: 'testCompany',
-        password: 'testPassword',
-        deletedAt: null,
-      };
-
-      const sellerRepositoryFindOneSpy = sellerRepository.findOne.calledWith(savedSeller.userId).mockResolvedValue(savedSeller);
-      try {
-        const result = await sut.getOne(savedSeller.userId);
-        expect(result).toEqual(savedSeller);
-      } catch (e) {
-        // console.error(e);
-      }
-    });
-
-    test('삭제된 유저인 경우', async () => {
-      // 해당 user Id 가져오기
-      const savedSeller: Seller = {
-        id: 1,
-        userId: 'test',
-        ceoName: 'testCEO',
-        companyName: 'testCompany',
-        password: 'testPassword',
-        deletedAt: new Date(),
-      };
-
-      const sellerRepositoryFindOneSpy = sellerRepository.findOne.calledWith(savedSeller.userId).mockResolvedValue(savedSeller);
-      try {
-        const result = await sut.getOne(savedSeller.userId);
-        expect(savedSeller.deletedAt).toBeInstanceOf(Date);
-        expect(sellerRepositoryFindOneSpy).toThrow();
-      } catch (e) {
-        // console.error(e);
-      }
-    });
-  });
-
   describe('판매자 회원 탈퇴 테스트', () => {
-
     test('아이디로 판매자를 조회했을 때 판매자 정보가 존재하지 않으면 에러를 던진다.', async () => {
-      const givenNoSellerUserId = "noSellerId"
+      const givenNoSellerUserId = 'noSellerId';
 
       sellerRepository.findOne.calledWith(givenNoSellerUserId).mockResolvedValue(null);
 
       await expect(async () => {
-        await sut.leave(givenNoSellerUserId)
-      }).rejects.toThrowError(new Error("판매자 아이디에 해당하는 판매자 정보 존재하지 않음"));
+        await sut.leave(givenNoSellerUserId);
+      }).rejects.toThrowError(new Error('판매자 아이디에 해당하는 판매자 정보 존재하지 않음'));
     });
 
     test('아이디로 판매자를 조회했을 때 삭제 일자가 존재한다면, 이미 탈퇴한 판매자이므로 에러를 던진다.', async () => {
@@ -156,7 +80,7 @@ describe('seller service test ', () => {
 
       await expect(async () => {
         await sut.leave(deletedSeller.userId);
-      }).rejects.toThrowError(new Error("이미 삭제된 판매자"));
+      }).rejects.toThrowError(new Error('이미 삭제된 판매자'));
     });
 
     test('아이디로 판매자를 조회했을 때 삭제 일자가 존재하지 않는다면 삭제 처리를 진행하고 삭제 일자가 저장된다', async () => {
@@ -176,7 +100,7 @@ describe('seller service test ', () => {
 
       const actualResult = await sut.leave(notDeletedSeller.userId);
 
-      expect(actualResult.deletedAt).not.toBeNull()
+      expect(actualResult.deletedAt).not.toBeNull();
     });
   });
 

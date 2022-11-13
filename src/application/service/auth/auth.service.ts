@@ -6,8 +6,8 @@ import { IPasswordEncryptor } from '../../../domain/service/auth/encrypt/passwor
 export class AuthService implements IAuthService {
   constructor(@Inject('IPasswordEncryptor') private passwordBcryptEncryptor: IPasswordEncryptor) {}
 
-  async signIn(rawPassword: string, hashedPassword: string): Promise<boolean> {
-    const compared = await this.passwordBcryptEncryptor.compare(rawPassword, hashedPassword);
-    return compared;
+  async signIn(): Promise<any> {
+    // TODO 추후 signIn 모듈 개발을 위하여 남겨둡니다 (사실 에러나서 남겨둠)
+    return;
   }
 }
