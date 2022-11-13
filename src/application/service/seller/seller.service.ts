@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Seller, TSellerSignUpIn, TSellerSignUpOut } from '../../../domain/service/seller/seller';
+import { ISellerSignInIn, Seller, TSellerSignUpIn, TSellerSignUpOut } from '../../../domain/service/seller/seller';
 import { ISellerRepository } from '../../../domain/service/seller/seller.repository';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 import { IPasswordEncryptor } from "../../../domain/service/auth/encrypt/password.encryptor";
@@ -47,5 +47,28 @@ export class SellerService implements ISellerService {
       throw Error("이미 삭제된 판매자");
     }
     return await this.sellerRepository.delete(userId);
+  }
+
+  async signIn(seller: ISellerSignInIn) {
+    const oneSeller = await this.sellerRepository.findOne(seller.userId);
+    if (!oneSeller || oneSeller.deletedAt) {
+      return null;
+    }
+
+    const comparePassword = await this.passwordEncryptor.compare(seller.password, oneSeller.password);
+    if (!comparePassword) {
+      return null;
+    }
+
+    return oneSeller;
+  }
+
+  async signOut(userId: string) {
+    const oneSeller = await this.sellerRepository.findOne(userId);
+    if (!oneSeller || oneSeller.deletedAt) {
+      return null;
+    }
+
+    return true;
   }
 }
