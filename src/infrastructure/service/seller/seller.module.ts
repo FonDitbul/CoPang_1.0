@@ -6,7 +6,7 @@ import { SellerPrismaRepository } from './seller.prisma.repository';
 import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [AuthModule],
+  imports: [],
   controllers: [SellerController],
   providers: [
     {

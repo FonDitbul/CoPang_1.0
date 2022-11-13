@@ -4,8 +4,6 @@
 import { Seller, TSellerSignUpIn, ISellerSignInIn } from './seller';
 
 export interface ISellerService {
-  getOne: (userId: string) => Promise<Seller>;
-  getAll: () => Promise<Seller[]>;
   signUp: (sellerSignUpIn: TSellerSignUpIn) => Promise<Seller>;
   signIn: (signInSeller: ISellerSignInIn) => Promise<Seller>;
   signOut: (userId: string) => Promise<boolean>;
