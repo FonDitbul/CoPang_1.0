@@ -25,3 +25,19 @@ export class SessionSignOutInterceptor implements NestInterceptor {
     return next.handle().pipe(tap(() => delete session.user));
   }
 }
+
+@Injectable()
+export class SessionChangeInfoInterceptor implements NestInterceptor {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    const request = context.switchToHttp().getRequest();
+    const session = request.session;
+
+    return next.handle().pipe(
+      map((data) => {
+        delete session.user
+        session.user = data;
+        return data
+      }),
+    );
+  }
+}

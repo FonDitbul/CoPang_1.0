@@ -1,7 +1,12 @@
 import { MockProxy, mock, any } from 'jest-mock-extended';
 import { SellerService } from './seller.service';
 import { ISellerRepository } from '../../../domain/service/seller/seller.repository';
-import { Seller, ISellerSignInIn } from '../../../domain/service/seller/seller';
+import {
+  Seller,
+  ISellerSignInIn,
+  ISellerChangeInfoIn,
+  TSellerChangeInfoOut
+} from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 import { IPasswordEncryptor } from '../../../domain/service/auth/encrypt/password.encryptor';
 
@@ -240,6 +245,158 @@ describe('seller service test ', () => {
 
       expect(result).toEqual(null);
       expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(signOutSellerUserId);
+    });
+  });
+
+  describe('판매자 유저 정보 찾기 테스트', () => {
+    const findUserId = 'test'
+
+    test('정상적으로 정보를 찾았을 때', async () => {
+      const foundSeller: Seller = {
+        id: 1,
+        userId: findUserId,
+        ceoName: 'test',
+        companyName: 'CoPang',
+        password: testEncryptPassword,
+        deletedAt: null
+      }
+      const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockResolvedValue(foundSeller);
+
+      expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(findUserId);
+    });
+
+    test('삭제된 유저의 정보를 찾았을 때', async () => {
+      const foundDeletedSeller: Seller = {
+        id: 1,
+        userId: findUserId,
+        ceoName: 'test',
+        companyName: 'CoPang',
+        password: testEncryptPassword,
+        deletedAt: new Date()
+      }
+
+      const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockResolvedValue(foundDeletedSeller);
+      const result = await sut.findUser(findUserId);
+
+      expect(result).toEqual(null);
+      expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(findUserId);
+    });
+
+    test('없는 유저의 정보를 찾았을 때', async () => {
+      const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockResolvedValue(null);
+      const result = await sut.findUser(findUserId);
+
+      expect(result).toEqual(null);
+      expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(findUserId);
+    });
+  });
+
+  describe('판매자 유저 수정하기 테스트', () => {
+    const originSeller: Seller = {
+      id: 1,
+      userId: 'test',
+      ceoName: 'originCeo',
+      companyName: 'CoPang',
+      password: testEncryptPassword,
+      deletedAt: null
+    }
+
+    const changedSeller: Seller = {
+      id: 1,
+      userId: 'changedId',
+      ceoName: 'changedCeo',
+      companyName: 'CoPang',
+      password: testEncryptPassword,
+      deletedAt: null
+    }
+
+    test('정상적으로 정보를 수정했을 때', async () => {
+      const changeInfoIn: ISellerChangeInfoIn = {
+        originUserId: 'test',
+        userId: 'changedId',
+        ceoName: 'changedCeo',
+        companyName: 'CoPang',
+        password: testPassword
+      }
+
+      const sellerChangeInfoOut: TSellerChangeInfoOut = {
+        ...changeInfoIn,
+        id: 1,
+        password: testEncryptPassword
+      }
+
+      passwordEncryptor.encrypt.calledWith(any()).mockResolvedValue(testEncryptPassword);
+
+      const passwordEncryptorSpy = jest.spyOn(passwordEncryptor, 'compare').mockResolvedValue(true);
+      const sellerRepositoryUpdateSpy = jest.spyOn(sellerRepository, 'update').mockResolvedValue(changedSeller);
+      const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne')
+        .mockResolvedValueOnce(originSeller).mockResolvedValue(null);
+      const result = await sut.changeInfo(changeInfoIn)
+
+      expect(result).toEqual(changedSeller)
+      expect(sellerRepositoryUpdateSpy).toHaveBeenCalledWith(sellerChangeInfoOut);
+      expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(changedSeller.userId);
+      expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(originSeller.userId);
+      expect(passwordEncryptorSpy).toHaveBeenCalledWith(changeInfoIn.password, testEncryptPassword);
+    });
+
+    test('이미 존재하는 유저의 아이디로 변경을 시도했을 때', async () => {
+      const someSeller: Seller = {
+        id: 2,
+        userId: 'someId',
+        ceoName: 'someCEO',
+        companyName: 'CoPang',
+        password: testEncryptPassword,
+        deletedAt: null
+      }
+
+      const changeInfoIn: ISellerChangeInfoIn = {
+        originUserId: 'test',
+        userId: 'someId',
+        ceoName: 'guyCEO',
+        companyName: 'CoPang',
+        password: testPassword
+      }
+
+      passwordEncryptor.encrypt.calledWith(any()).mockResolvedValue(testEncryptPassword);
+      jest.spyOn(sellerRepository, 'update').mockResolvedValue(changedSeller);
+
+      const passwordEncryptorSpy = jest.spyOn(passwordEncryptor, 'compare').mockResolvedValue(true);
+      const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne')
+        .mockResolvedValueOnce(originSeller).mockResolvedValue(someSeller);
+
+      expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(changedSeller.userId);
+      expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(originSeller.userId);
+      expect(passwordEncryptorSpy).toHaveBeenCalledWith(changeInfoIn.password, testEncryptPassword);
+
+      await expect(async () => {
+        await sut.changeInfo(changeInfoIn);
+      }).rejects.toThrowError(new Error('이미 존재하는 유저 아이디 입니다.'));
+    });
+
+
+    test('비밀번호를 잘못 입력했을 때', async () => {
+      const changeInfoIn: ISellerChangeInfoIn = {
+        originUserId: 'test',
+        userId: 'someId',
+        ceoName: 'guyCEO',
+        companyName: 'CoPang',
+        password: testPassword
+      }
+
+      const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne')
+        .mockResolvedValueOnce(originSeller).mockResolvedValue(null);
+
+      passwordEncryptor.encrypt.calledWith(any()).mockResolvedValue(testEncryptPassword);
+
+      const passwordEncryptorSpy = jest.spyOn(passwordEncryptor, 'compare').mockResolvedValue(false);
+
+      expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(changedSeller.userId);
+      expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(originSeller.userId);
+      expect(passwordEncryptorSpy).toHaveBeenCalledWith(changeInfoIn.password, testEncryptPassword);
+
+      const result = await sut.changeInfo(changeInfoIn)
+      expect(result).toEqual(null)
     });
   });
 });
