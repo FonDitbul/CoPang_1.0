@@ -73,7 +73,7 @@ export class SellerController {
   }
 
   @UseGuards(AuthHttpGuard)
-  @Post('/seller/findUser')
+  @Get('/seller/findUser')
   async findUser(@Session() session: Record<string, any>) {
     const seller = await this.sellerService.findUser(session.user.userId);
     if (!seller) {
@@ -89,7 +89,7 @@ export class SellerController {
 
   @UseGuards(AuthHttpGuard)
   @UseInterceptors(SessionChangeInfoInterceptor)
-  @Get('/seller/changeInfo')
+  @Post('/seller/changeInfo')
   async changeInfo(@Session() session: Record<string, any>, @Body() changeInfoRequest: TSellerChangeInfoRequest) {
     const changeSellerInfoIn: ISellerChangeInfoIn = {
       ...changeInfoRequest,
