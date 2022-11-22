@@ -56,6 +56,11 @@ export class TSellerChangeInfoRequest {
   @IsNotEmpty()
   @Matches('^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$')
   password: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Matches('^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$')
+  originPassword: string;
 }
 
 export type TSellerChangeInfoResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>;

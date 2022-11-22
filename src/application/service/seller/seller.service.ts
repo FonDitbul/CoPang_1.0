@@ -78,11 +78,11 @@ export class SellerService implements ISellerService {
       return null;
     }
 
-    if (changeSeller !== null) {
-      throw Error("이미 존재하는 유저 아이디 입니다.");
+    if (changeSeller && changeSeller.deletedAt === null) {
+      throw Error('이미 존재하는 유저 아이디 입니다.');
     }
 
-    const comparePassword = await this.passwordEncryptor.compare(seller.password, seller.password);
+    const comparePassword = await this.passwordEncryptor.compare(sellerChangeInfoIn.originPassword, seller.password);
     if (!comparePassword) {
       return null;
     }

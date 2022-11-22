@@ -313,6 +313,7 @@ describe('seller service test ', () => {
     test('정상적으로 정보를 수정했을 때', async () => {
       const changeInfoIn: ISellerChangeInfoIn = {
         originUserId: 'test',
+        originPassword: 'somePassword',
         userId: 'changedId',
         ceoName: 'changedCeo',
         companyName: 'CoPang',
@@ -352,6 +353,7 @@ describe('seller service test ', () => {
 
       const changeInfoIn: ISellerChangeInfoIn = {
         originUserId: 'test',
+        originPassword: 'somePassword',
         userId: 'someId',
         ceoName: 'guyCEO',
         companyName: 'CoPang',
@@ -378,6 +380,7 @@ describe('seller service test ', () => {
     test('비밀번호를 잘못 입력했을 때', async () => {
       const changeInfoIn: ISellerChangeInfoIn = {
         originUserId: 'test',
+        originPassword: 'somePassword',
         userId: 'someId',
         ceoName: 'guyCEO',
         companyName: 'CoPang',

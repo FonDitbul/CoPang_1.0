@@ -18,6 +18,7 @@ export interface ISellerSignInIn {
 
 export interface ISellerChangeInfoIn {
   originUserId: string;
+  originPassword: string;
   userId: string;
   ceoName: string;
   companyName: string;
