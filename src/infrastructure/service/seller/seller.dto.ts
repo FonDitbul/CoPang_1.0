@@ -42,10 +42,6 @@ export type TSellerFindUserResponse = Pick<Seller, 'userId' | 'ceoName' | 'compa
 export class TSellerChangeInfoRequest {
   @IsString()
   @IsNotEmpty()
-  userId: string;
-
-  @IsString()
-  @IsNotEmpty()
   ceoName: string;
 
   @IsString()

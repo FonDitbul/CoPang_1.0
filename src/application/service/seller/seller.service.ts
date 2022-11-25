@@ -72,23 +72,19 @@ export class SellerService implements ISellerService {
 
   async changeInfo(sellerChangeInfoIn: ISellerChangeInfoIn): Promise<Seller> {
     const seller = await this.sellerRepository.findOne(sellerChangeInfoIn.originUserId);
-    const changeSeller = await this.sellerRepository.findOne(sellerChangeInfoIn.userId);
 
     if (!seller || seller.deletedAt) {
       return null;
     }
 
-    if (changeSeller && changeSeller.deletedAt === null) {
-      throw Error('이미 존재하는 유저 아이디 입니다.');
-    }
-
-    const comparePassword = await this.passwordEncryptor.compare(sellerChangeInfoIn.originPassword, seller.password);
-    if (!comparePassword) {
+    const isPasswordRight = await this.passwordEncryptor.compare(sellerChangeInfoIn.originPassword, seller.password);
+    if (!isPasswordRight) {
       return null;
     }
 
     const sellerChangeInfoOut: TSellerChangeInfoOut = {
       ...sellerChangeInfoIn,
+      userId: seller.userId,
       id: seller.id,
       password: await this.passwordEncryptor.encrypt(sellerChangeInfoIn.password),
     }
