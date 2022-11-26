@@ -14,7 +14,7 @@ model Seller {
   companyName String    @map("company_name")
   password    String
   createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @default(now()) @map("updated_at")
+  updatedAt   DateTime  @default(now()) @map("updated_at") @updatedAt
   deletedAt   DateTime? @map("deleted_at")
   Products    SellerProduct[]
   @@map("seller")
@@ -25,7 +25,7 @@ model Product {
   productName String    @map("product_name")
   productDesc String    @map("product_desc")
   createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @default(now()) @map("updated_at")
+  updatedAt   DateTime  @default(now()) @map("updated_at") @updatedAt
   deletedAt   DateTime? @map("deleted_at")
 	Sellers     SellerProduct[]
   @@map("product")
@@ -38,7 +38,7 @@ model SellerProduct {
   price     Int
   count     Int
   createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @default(now()) @map("updated_at")
+  updatedAt DateTime  @default(now()) @map("updated_at") @updatedAt
   deletedAt DateTime? @map("deleted_at")
   Sellers    Seller    @relation(fields: [sellerId], references: [id])
   Products   Product   @relation(fields: [productId], references: [id])
