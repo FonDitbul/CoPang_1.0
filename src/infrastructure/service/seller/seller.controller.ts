@@ -1,9 +1,20 @@
 import { Body, Controller, Delete, Get, HttpException, HttpStatus, Inject, Param, Post, Session, UseGuards, UseInterceptors } from '@nestjs/common';
-import { TSellerLeaveResponse, SellerSignInRequest, TSellerSignInResponse, TSellerSignUpRequest, TSellerSignUpResponse } from './seller.dto';
-import { TSellerSignUpIn } from '../../../domain/service/seller/seller';
+import {
+  TSellerLeaveResponse,
+  SellerSignInRequest,
+  TSellerSignInResponse,
+  TSellerSignUpRequest,
+  TSellerSignUpResponse,
+  TSellerFindUserResponse, TSellerChangeInfoRequest, TSellerChangeInfoResponse
+} from "./seller.dto";
+import { ISellerChangeInfoIn, TSellerSignUpIn } from "../../../domain/service/seller/seller";
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 import { AuthHttpGuard } from '../auth/auth.http.guard';
-import { SessionSignInInterceptor, SessionSignOutInterceptor } from '../auth/auth.interceptor.session';
+import {
+  SessionChangeInfoInterceptor,
+  SessionSignInInterceptor,
+  SessionSignOutInterceptor
+} from "../auth/auth.interceptor.session";
 
 @Controller()
 export class SellerController {
@@ -60,4 +71,40 @@ export class SellerController {
       throw new HttpException('UnauthorizedException', HttpStatus.UNAUTHORIZED);
     }
   }
+
+  @UseGuards(AuthHttpGuard)
+  @Get('/seller/findUser')
+  async findUser(@Session() session: Record<string, any>) {
+    const seller = await this.sellerService.findUser(session.user.userId);
+    if (!seller) {
+      throw new HttpException('UnauthorizedException', HttpStatus.UNAUTHORIZED);
+    }
+    const sellerInformation: TSellerFindUserResponse = {
+      userId: seller.userId,
+      companyName: seller.companyName,
+      ceoName: seller.ceoName
+    }
+    return sellerInformation
+  }
+
+  @UseGuards(AuthHttpGuard)
+  @UseInterceptors(SessionChangeInfoInterceptor)
+  @Post('/seller/changeInfo')
+  async changeInfo(@Session() session: Record<string, any>, @Body() changeInfoRequest: TSellerChangeInfoRequest) {
+    const changeSellerInfoIn: ISellerChangeInfoIn = {
+      ...changeInfoRequest,
+      originUserId: session.user.userId
+    }
+    const seller = await this.sellerService.changeInfo(changeSellerInfoIn)
+    if (!seller) {
+      throw new HttpException('UnauthorizedException', HttpStatus.UNAUTHORIZED);
+    }
+    const sellerInformation: TSellerChangeInfoResponse = {
+      userId: seller.userId,
+      companyName: seller.companyName,
+      ceoName: seller.ceoName
+    }
+    return sellerInformation
+  }
+
 }

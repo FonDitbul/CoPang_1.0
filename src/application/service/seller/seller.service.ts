@@ -1,5 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ISellerSignInIn, Seller, TSellerSignUpIn, TSellerSignUpOut } from '../../../domain/service/seller/seller';
+import {
+  ISellerChangeInfoIn,
+  ISellerSignInIn,
+  Seller,
+  TSellerChangeInfoOut,
+  TSellerSignUpIn,
+  TSellerSignUpOut
+} from "../../../domain/service/seller/seller";
 import { ISellerRepository } from '../../../domain/service/seller/seller.repository';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 import { IPasswordEncryptor } from '../../../domain/service/auth/encrypt/password.encryptor';
@@ -54,4 +61,35 @@ export class SellerService implements ISellerService {
 
     return true;
   }
+
+  async findUser(userId: string): Promise<Seller> {
+    const seller = await this.sellerRepository.findOne(userId);
+    if (!seller || seller.deletedAt) {
+      return null;
+    }
+    return seller;
+  }
+
+  async changeInfo(sellerChangeInfoIn: ISellerChangeInfoIn): Promise<Seller> {
+    const seller = await this.sellerRepository.findOne(sellerChangeInfoIn.originUserId);
+
+    if (!seller || seller.deletedAt) {
+      return null;
+    }
+
+    const isPasswordRight = await this.passwordEncryptor.compare(sellerChangeInfoIn.originPassword, seller.password);
+    if (!isPasswordRight) {
+      return null;
+    }
+
+    const sellerChangeInfoOut: TSellerChangeInfoOut = {
+      ...sellerChangeInfoIn,
+      userId: seller.userId,
+      id: seller.id,
+      password: await this.passwordEncryptor.encrypt(sellerChangeInfoIn.password),
+    }
+
+    return await this.sellerRepository.update(sellerChangeInfoOut);
+  }
 }
+

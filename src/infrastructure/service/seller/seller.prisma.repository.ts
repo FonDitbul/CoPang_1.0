@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Seller as SellerEntity } from '@prisma/client';
-import { TSellerSignUpOut } from '../../../domain/service/seller/seller';
+import { TSellerChangeInfoOut, TSellerSignUpOut } from "../../../domain/service/seller/seller";
 import { ISellerRepository } from '../../../domain/service/seller/seller.repository';
 import { PrismaService } from '../../prisma/prisma.service';
 
@@ -41,4 +41,20 @@ export class SellerPrismaRepository implements ISellerRepository {
       },
     });
   }
+
+  async update(changeSeller: TSellerChangeInfoOut): Promise<SellerEntity> {
+    return await this.prisma.seller.update({
+      where: {
+        id: changeSeller.id,
+      },
+      data: {
+        userId: changeSeller.userId,
+        ceoName: changeSeller.ceoName,
+        companyName: changeSeller.companyName,
+        password: changeSeller.password,
+        updatedAt: new Date(),
+      },
+    });
+  }
+
 }
