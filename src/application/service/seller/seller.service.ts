@@ -1,15 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import {
-  ISellerChangeInfoIn,
-  ISellerSignInIn,
-  Seller,
-  TSellerChangeInfoOut,
-  TSellerSignUpIn,
-  TSellerSignUpOut
-} from "../../../domain/service/seller/seller";
+import { ISellerChangeInfoIn, ISellerSignInIn, Seller, TSellerChangeInfoOut, TSellerSignUpIn, TSellerSignUpOut } from '../../../domain/service/seller/seller';
 import { ISellerRepository } from '../../../domain/service/seller/seller.repository';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 import { IPasswordEncryptor } from '../../../domain/service/auth/encrypt/password.encryptor';
+import { ERROR_STATUS } from '../../../domain/common/const';
 
 @Injectable()
 export class SellerService implements ISellerService {
@@ -18,7 +12,7 @@ export class SellerService implements ISellerService {
   async signUp(sellerSignUpIn: TSellerSignUpIn): Promise<Seller> {
     const sellerWithSameUserId = await this.sellerRepository.findOne(sellerSignUpIn.userId);
     if (sellerWithSameUserId !== null) {
-      throw Error('이미 등록된 판매자 아이디');
+      throw new Error(ERROR_STATUS.userIdDuplicate);
     }
 
     const sellerSignUpOut: TSellerSignUpOut = {
@@ -31,23 +25,27 @@ export class SellerService implements ISellerService {
   async leave(userId: string): Promise<Seller> {
     const seller = await this.sellerRepository.findOne(userId);
     if (seller === null) {
-      throw Error('판매자 아이디에 해당하는 판매자 정보 존재하지 않음');
+      throw new Error(ERROR_STATUS.userNotExist);
     }
     if (seller.deletedAt) {
-      throw Error('이미 삭제된 판매자');
+      throw new Error(ERROR_STATUS.userDelete);
     }
     return await this.sellerRepository.delete(userId);
   }
 
   async signIn(seller: ISellerSignInIn) {
     const oneSeller = await this.sellerRepository.findOne(seller.userId);
-    if (!oneSeller || oneSeller.deletedAt) {
-      return null;
+    if (!oneSeller) {
+      throw new Error(ERROR_STATUS.userNotExist);
     }
 
-    const comparePassword = await this.passwordEncryptor.compare(seller.password, oneSeller.password);
-    if (!comparePassword) {
-      return null;
+    if (oneSeller.deletedAt) {
+      throw new Error(ERROR_STATUS.userDelete);
+    }
+
+    const isPasswordRight = await this.passwordEncryptor.compare(seller.password, oneSeller.password);
+    if (!isPasswordRight) {
+      throw new Error(ERROR_STATUS.userPasswordNotMatch);
     }
 
     return oneSeller;
@@ -55,8 +53,12 @@ export class SellerService implements ISellerService {
 
   async signOut(userId: string) {
     const oneSeller = await this.sellerRepository.findOne(userId);
-    if (!oneSeller || oneSeller.deletedAt) {
-      return null;
+    if (!oneSeller) {
+      throw new Error(ERROR_STATUS.userNotExist);
+    }
+
+    if (oneSeller.deletedAt) {
+      throw new Error(ERROR_STATUS.userDelete);
     }
 
     return true;
@@ -64,22 +66,31 @@ export class SellerService implements ISellerService {
 
   async findUser(userId: string): Promise<Seller> {
     const seller = await this.sellerRepository.findOne(userId);
-    if (!seller || seller.deletedAt) {
-      return null;
+    if (!seller) {
+      throw new Error(ERROR_STATUS.userNotExist);
     }
+
+    if (seller.deletedAt) {
+      throw new Error(ERROR_STATUS.userDelete);
+    }
+
     return seller;
   }
 
   async changeInfo(sellerChangeInfoIn: ISellerChangeInfoIn): Promise<Seller> {
     const seller = await this.sellerRepository.findOne(sellerChangeInfoIn.originUserId);
 
-    if (!seller || seller.deletedAt) {
-      return null;
+    if (!seller) {
+      throw new Error(ERROR_STATUS.userNotExist);
+    }
+
+    if (seller.deletedAt) {
+      throw new Error(ERROR_STATUS.userDelete);
     }
 
     const isPasswordRight = await this.passwordEncryptor.compare(sellerChangeInfoIn.originPassword, seller.password);
     if (!isPasswordRight) {
-      return null;
+      throw new Error(ERROR_STATUS.userPasswordNotMatch);
     }
 
     const sellerChangeInfoOut: TSellerChangeInfoOut = {
@@ -87,9 +98,8 @@ export class SellerService implements ISellerService {
       userId: seller.userId,
       id: seller.id,
       password: await this.passwordEncryptor.encrypt(sellerChangeInfoIn.password),
-    }
+    };
 
     return await this.sellerRepository.update(sellerChangeInfoOut);
   }
 }
-
