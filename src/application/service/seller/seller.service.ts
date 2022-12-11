@@ -3,7 +3,7 @@ import { ISellerChangeInfoIn, ISellerSignInIn, Seller, TSellerChangeInfoOut, TSe
 import { ISellerRepository } from '../../../domain/service/seller/seller.repository';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 import { IPasswordEncryptor } from '../../../domain/service/auth/encrypt/password.encryptor';
-import { ERROR_STATUS } from '../../../domain/common/const';
+import { CoPangException, EXCEPTION_STATUS } from '../../../domain/common/exception';
 
 @Injectable()
 export class SellerService implements ISellerService {
@@ -12,7 +12,7 @@ export class SellerService implements ISellerService {
   async signUp(sellerSignUpIn: TSellerSignUpIn): Promise<Seller> {
     const sellerWithSameUserId = await this.sellerRepository.findOne(sellerSignUpIn.userId);
     if (sellerWithSameUserId !== null) {
-      throw new Error(ERROR_STATUS.userIdDuplicate);
+      throw new CoPangException(EXCEPTION_STATUS.USER_ID_DUPLICATE);
     }
 
     const sellerSignUpOut: TSellerSignUpOut = {
@@ -25,10 +25,10 @@ export class SellerService implements ISellerService {
   async leave(userId: string): Promise<Seller> {
     const seller = await this.sellerRepository.findOne(userId);
     if (seller === null) {
-      throw new Error(ERROR_STATUS.userNotExist);
+      throw new CoPangException(EXCEPTION_STATUS.USER_NOT_EXIST);
     }
     if (seller.deletedAt) {
-      throw new Error(ERROR_STATUS.userDelete);
+      throw new CoPangException(EXCEPTION_STATUS.USER_DELETED);
     }
     return await this.sellerRepository.delete(userId);
   }
@@ -36,16 +36,16 @@ export class SellerService implements ISellerService {
   async signIn(seller: ISellerSignInIn) {
     const oneSeller = await this.sellerRepository.findOne(seller.userId);
     if (!oneSeller) {
-      throw new Error(ERROR_STATUS.userNotExist);
+      throw new CoPangException(EXCEPTION_STATUS.USER_NOT_EXIST);
     }
 
     if (oneSeller.deletedAt) {
-      throw new Error(ERROR_STATUS.userDelete);
+      throw new CoPangException(EXCEPTION_STATUS.USER_DELETED);
     }
 
     const isPasswordRight = await this.passwordEncryptor.compare(seller.password, oneSeller.password);
     if (!isPasswordRight) {
-      throw new Error(ERROR_STATUS.userPasswordNotMatch);
+      throw new CoPangException(EXCEPTION_STATUS.USER_PASSWORD_NOT_MATCH);
     }
 
     return oneSeller;
@@ -54,11 +54,11 @@ export class SellerService implements ISellerService {
   async signOut(userId: string) {
     const oneSeller = await this.sellerRepository.findOne(userId);
     if (!oneSeller) {
-      throw new Error(ERROR_STATUS.userNotExist);
+      throw new CoPangException(EXCEPTION_STATUS.USER_NOT_EXIST);
     }
 
     if (oneSeller.deletedAt) {
-      throw new Error(ERROR_STATUS.userDelete);
+      throw new CoPangException(EXCEPTION_STATUS.USER_DELETED);
     }
 
     return true;
@@ -67,11 +67,11 @@ export class SellerService implements ISellerService {
   async findUser(userId: string): Promise<Seller> {
     const seller = await this.sellerRepository.findOne(userId);
     if (!seller) {
-      throw new Error(ERROR_STATUS.userNotExist);
+      throw new CoPangException(EXCEPTION_STATUS.USER_NOT_EXIST);
     }
 
     if (seller.deletedAt) {
-      throw new Error(ERROR_STATUS.userDelete);
+      throw new CoPangException(EXCEPTION_STATUS.USER_DELETED);
     }
 
     return seller;
@@ -81,16 +81,16 @@ export class SellerService implements ISellerService {
     const seller = await this.sellerRepository.findOne(sellerChangeInfoIn.originUserId);
 
     if (!seller) {
-      throw new Error(ERROR_STATUS.userNotExist);
+      throw new CoPangException(EXCEPTION_STATUS.USER_NOT_EXIST);
     }
 
     if (seller.deletedAt) {
-      throw new Error(ERROR_STATUS.userDelete);
+      throw new CoPangException(EXCEPTION_STATUS.USER_DELETED);
     }
 
     const isPasswordRight = await this.passwordEncryptor.compare(sellerChangeInfoIn.originPassword, seller.password);
     if (!isPasswordRight) {
-      throw new Error(ERROR_STATUS.userPasswordNotMatch);
+      throw new CoPangException(EXCEPTION_STATUS.USER_PASSWORD_NOT_MATCH);
     }
 
     const sellerChangeInfoOut: TSellerChangeInfoOut = {

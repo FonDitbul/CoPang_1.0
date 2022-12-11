@@ -4,7 +4,7 @@ import { ISellerRepository } from '../../../domain/service/seller/seller.reposit
 import { Seller, ISellerSignInIn, ISellerChangeInfoIn, TSellerChangeInfoOut } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 import { IPasswordEncryptor } from '../../../domain/service/auth/encrypt/password.encryptor';
-import { ERROR_STATUS } from '../../../domain/common/const';
+import { CoPangException, EXCEPTION_STATUS } from '../../../domain/common/exception';
 
 describe('seller service test ', () => {
   const sellerRepository: MockProxy<ISellerRepository> = mock<ISellerRepository>();
@@ -36,7 +36,7 @@ describe('seller service test ', () => {
 
       await expect(async () => {
         await sut.signUp(givenSignInSeller);
-      }).rejects.toThrowError(new Error(ERROR_STATUS.userIdDuplicate));
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.USER_ID_DUPLICATE));
     });
 
     test('주어진 아이디로 회원가입한 판매자가 존재하지 않을 경우 비밀번호가 암호화되어 정상적으로 등록된다.', async () => {
@@ -66,7 +66,7 @@ describe('seller service test ', () => {
 
       await expect(async () => {
         await sut.leave(givenNoSellerUserId);
-      }).rejects.toThrowError(new Error(ERROR_STATUS.userNotExist));
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.USER_NOT_EXIST));
     });
 
     test('아이디로 판매자를 조회했을 때 삭제 일자가 존재한다면, 이미 탈퇴한 판매자이므로 에러를 던진다.', async () => {
@@ -81,7 +81,7 @@ describe('seller service test ', () => {
 
       await expect(async () => {
         await sut.leave(deletedSeller.userId);
-      }).rejects.toThrowError(new Error(ERROR_STATUS.userDelete));
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.USER_DELETED));
     });
 
     test('아이디로 판매자를 조회했을 때 삭제 일자가 존재하지 않는다면 삭제 처리를 진행하고 삭제 일자가 저장된다', async () => {
@@ -141,7 +141,7 @@ describe('seller service test ', () => {
 
       await expect(async () => {
         await sut.signIn(signInInSeller);
-      }).rejects.toThrowError(new Error(ERROR_STATUS.userNotExist));
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.USER_NOT_EXIST));
 
       expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(signInInSeller.userId);
     });
@@ -165,7 +165,7 @@ describe('seller service test ', () => {
 
       await expect(async () => {
         await sut.signIn(signInInSeller);
-      }).rejects.toThrowError(new Error(ERROR_STATUS.userDelete));
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.USER_DELETED));
 
       expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(signInInSeller.userId);
     });
@@ -191,7 +191,7 @@ describe('seller service test ', () => {
 
       await expect(async () => {
         await sut.signIn(signInInSeller);
-      }).rejects.toThrowError(new Error(ERROR_STATUS.userPasswordNotMatch));
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.USER_PASSWORD_NOT_MATCH));
 
       expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(signInInSeller.userId);
       expect(passwordEncryptorSpy).toHaveBeenCalledWith(signInInSeller.password, testEncryptPassword);
@@ -233,7 +233,7 @@ describe('seller service test ', () => {
 
       await expect(async () => {
         await sut.signOut(signOutSellerUserId);
-      }).rejects.toThrowError(new Error(ERROR_STATUS.userDelete));
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.USER_DELETED));
 
       expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(signOutSellerUserId);
     });
@@ -243,7 +243,7 @@ describe('seller service test ', () => {
 
       await expect(async () => {
         await sut.signOut(signOutSellerUserId);
-      }).rejects.toThrowError(new Error(ERROR_STATUS.userNotExist));
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.USER_NOT_EXIST));
 
       expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(signOutSellerUserId);
     });
@@ -282,7 +282,7 @@ describe('seller service test ', () => {
 
       await expect(async () => {
         await sut.findUser(findUserId);
-      }).rejects.toThrowError(new Error(ERROR_STATUS.userDelete));
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.USER_DELETED));
 
       expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(findUserId);
     });
@@ -292,7 +292,7 @@ describe('seller service test ', () => {
 
       await expect(async () => {
         await sut.findUser(findUserId);
-      }).rejects.toThrowError(new Error(ERROR_STATUS.userNotExist));
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.USER_NOT_EXIST));
 
       expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(findUserId);
     });
@@ -367,7 +367,7 @@ describe('seller service test ', () => {
 
       await expect(async () => {
         await sut.changeInfo(changeInfoIn);
-      }).rejects.toThrowError(new Error(ERROR_STATUS.userPasswordNotMatch));
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.USER_PASSWORD_NOT_MATCH));
     });
   });
 });

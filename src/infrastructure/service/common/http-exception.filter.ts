@@ -1,27 +1,25 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, HttpStatus } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { badRequestError, forbiddenError } from './exception';
+import { CoPangException } from '../../../domain/common/exception';
 
-@Catch(HttpException)
+@Catch(CoPangException)
 export class HttpExceptionFilter implements ExceptionFilter {
-  catch(exception: HttpException, host: ArgumentsHost) {
+  catch(exception: CoPangException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
-    let status = exception.getStatus();
+    const message = exception.getMessage();
     console.error(exception);
-    if (badRequestError.includes(exception.message)) {
-      status = HttpStatus.BAD_REQUEST;
-    }
 
-    if (forbiddenError.includes(exception.message)) {
-      status = HttpStatus.FORBIDDEN;
-    }
-
-    return response.status(status).json({
-      statusCode: status,
+    const responseBody = {
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: message,
       timestamp: new Date().toISOString(),
       path: request.url,
-    });
+    };
+
+    console.log(responseBody);
+
+    return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json(responseBody);
   }
 }
