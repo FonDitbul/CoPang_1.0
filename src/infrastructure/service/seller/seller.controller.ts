@@ -1,20 +1,9 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Inject, Param, Post, Session, UseGuards, UseInterceptors } from '@nestjs/common';
-import {
-  TSellerLeaveResponse,
-  SellerSignInRequest,
-  TSellerSignInResponse,
-  TSellerSignUpRequest,
-  TSellerSignUpResponse,
-  TSellerFindUserResponse, TSellerChangeInfoRequest, TSellerChangeInfoResponse
-} from "./seller.dto";
-import { ISellerChangeInfoIn, TSellerSignUpIn } from "../../../domain/service/seller/seller";
+import { Body, Controller, Delete, Get, Inject, Param, Post, Session, UseGuards, UseInterceptors } from '@nestjs/common';
+import { TSellerLeaveResponse, SellerSignInRequest, TSellerSignInResponse, TSellerSignUpRequest, TSellerSignUpResponse, TSellerFindUserResponse, TSellerChangeInfoRequest, TSellerChangeInfoResponse } from './seller.dto';
+import { ISellerChangeInfoIn, TSellerSignUpIn } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 import { AuthHttpGuard } from '../auth/auth.http.guard';
-import {
-  SessionChangeInfoInterceptor,
-  SessionSignInInterceptor,
-  SessionSignOutInterceptor
-} from "../auth/auth.interceptor.session";
+import { SessionChangeInfoInterceptor, SessionSignInInterceptor, SessionSignOutInterceptor } from '../auth/auth.interceptor.session';
 
 @Controller()
 export class SellerController {
@@ -25,12 +14,14 @@ export class SellerController {
     const sellerSignUpInbound: TSellerSignUpIn = {
       ...request,
     };
+
     const createdSeller = await this.sellerService.signUp(sellerSignUpInbound);
     const response: TSellerSignUpResponse = {
       userId: createdSeller.userId,
       ceoName: createdSeller.ceoName,
       companyName: createdSeller.companyName,
     };
+
     return response;
   }
 
@@ -42,6 +33,7 @@ export class SellerController {
       ceoName: leavedSeller.ceoName,
       companyName: leavedSeller.companyName,
     };
+
     return response;
   }
 
@@ -49,9 +41,6 @@ export class SellerController {
   @UseInterceptors(SessionSignInInterceptor)
   async signIn(@Session() session: Record<string, any>, @Body() signInSellerRequest: SellerSignInRequest) {
     const seller = await this.sellerService.signIn(signInSellerRequest);
-    if (!seller) {
-      throw new HttpException('UnauthorizedException', HttpStatus.UNAUTHORIZED);
-    }
 
     const response: TSellerSignInResponse = {
       userId: seller.userId,
@@ -66,25 +55,21 @@ export class SellerController {
   @UseInterceptors(SessionSignOutInterceptor)
   @Post('/seller/signOut')
   async signOut(@Session() session: Record<string, any>) {
-    const seller = await this.sellerService.signOut(session.user.userId);
-    if (!seller) {
-      throw new HttpException('UnauthorizedException', HttpStatus.UNAUTHORIZED);
-    }
+    await this.sellerService.signOut(session.user.userId);
   }
 
   @UseGuards(AuthHttpGuard)
   @Get('/seller/findUser')
   async findUser(@Session() session: Record<string, any>) {
     const seller = await this.sellerService.findUser(session.user.userId);
-    if (!seller) {
-      throw new HttpException('UnauthorizedException', HttpStatus.UNAUTHORIZED);
-    }
+
     const sellerInformation: TSellerFindUserResponse = {
       userId: seller.userId,
       companyName: seller.companyName,
-      ceoName: seller.ceoName
-    }
-    return sellerInformation
+      ceoName: seller.ceoName,
+    };
+
+    return sellerInformation;
   }
 
   @UseGuards(AuthHttpGuard)
@@ -93,18 +78,17 @@ export class SellerController {
   async changeInfo(@Session() session: Record<string, any>, @Body() changeInfoRequest: TSellerChangeInfoRequest) {
     const changeSellerInfoIn: ISellerChangeInfoIn = {
       ...changeInfoRequest,
-      originUserId: session.user.userId
-    }
-    const seller = await this.sellerService.changeInfo(changeSellerInfoIn)
-    if (!seller) {
-      throw new HttpException('UnauthorizedException', HttpStatus.UNAUTHORIZED);
-    }
+      originUserId: session.user.userId,
+    };
+
+    const seller = await this.sellerService.changeInfo(changeSellerInfoIn);
+
     const sellerInformation: TSellerChangeInfoResponse = {
       userId: seller.userId,
       companyName: seller.companyName,
-      ceoName: seller.ceoName
-    }
-    return sellerInformation
-  }
+      ceoName: seller.ceoName,
+    };
 
+    return sellerInformation;
+  }
 }
