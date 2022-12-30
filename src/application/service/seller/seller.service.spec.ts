@@ -1,14 +1,10 @@
 import { MockProxy, mock, any } from 'jest-mock-extended';
 import { SellerService } from './seller.service';
 import { ISellerRepository } from '../../../domain/service/seller/seller.repository';
-import {
-  Seller,
-  ISellerSignInIn,
-  ISellerChangeInfoIn,
-  TSellerChangeInfoOut
-} from '../../../domain/service/seller/seller';
+import { Seller, ISellerSignInIn, ISellerChangeInfoIn, TSellerChangeInfoOut } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 import { IPasswordEncryptor } from '../../../domain/service/auth/encrypt/password.encryptor';
+import { CoPangException, EXCEPTION_STATUS } from '../../../domain/common/exception';
 
 describe('seller service test ', () => {
   const sellerRepository: MockProxy<ISellerRepository> = mock<ISellerRepository>();
@@ -40,7 +36,7 @@ describe('seller service test ', () => {
 
       await expect(async () => {
         await sut.signUp(givenSignInSeller);
-      }).rejects.toThrowError(new Error('이미 등록된 판매자 아이디'));
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.USER_ID_DUPLICATE));
     });
 
     test('주어진 아이디로 회원가입한 판매자가 존재하지 않을 경우 비밀번호가 암호화되어 정상적으로 등록된다.', async () => {
@@ -70,7 +66,7 @@ describe('seller service test ', () => {
 
       await expect(async () => {
         await sut.leave(givenNoSellerUserId);
-      }).rejects.toThrowError(new Error('판매자 아이디에 해당하는 판매자 정보 존재하지 않음'));
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.USER_NOT_EXIST));
     });
 
     test('아이디로 판매자를 조회했을 때 삭제 일자가 존재한다면, 이미 탈퇴한 판매자이므로 에러를 던진다.', async () => {
@@ -85,7 +81,7 @@ describe('seller service test ', () => {
 
       await expect(async () => {
         await sut.leave(deletedSeller.userId);
-      }).rejects.toThrowError(new Error('이미 삭제된 판매자'));
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.USER_DELETED));
     });
 
     test('아이디로 판매자를 조회했을 때 삭제 일자가 존재하지 않는다면 삭제 처리를 진행하고 삭제 일자가 저장된다', async () => {
@@ -143,9 +139,10 @@ describe('seller service test ', () => {
 
       const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockResolvedValue(null);
 
-      const result = await sut.signIn(signInInSeller);
+      await expect(async () => {
+        await sut.signIn(signInInSeller);
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.USER_NOT_EXIST));
 
-      expect(result).toEqual(null);
       expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(signInInSeller.userId);
     });
 
@@ -166,9 +163,10 @@ describe('seller service test ', () => {
 
       const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockResolvedValue(signInSeller);
 
-      const result = await sut.signIn(signInInSeller);
+      await expect(async () => {
+        await sut.signIn(signInInSeller);
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.USER_DELETED));
 
-      expect(result).toEqual(null);
       expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(signInInSeller.userId);
     });
 
@@ -191,9 +189,10 @@ describe('seller service test ', () => {
       const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockResolvedValue(signInSeller);
       const passwordEncryptorSpy = jest.spyOn(passwordEncryptor, 'compare').mockResolvedValue(false);
 
-      const result = await sut.signIn(signInInSeller);
+      await expect(async () => {
+        await sut.signIn(signInInSeller);
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.USER_PASSWORD_NOT_MATCH));
 
-      expect(result).toEqual(null);
       expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(signInInSeller.userId);
       expect(passwordEncryptorSpy).toHaveBeenCalledWith(signInInSeller.password, testEncryptPassword);
     });
@@ -232,24 +231,26 @@ describe('seller service test ', () => {
 
       const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockResolvedValue(signOutSeller);
 
-      const result = await sut.signOut(signOutSellerUserId);
+      await expect(async () => {
+        await sut.signOut(signOutSellerUserId);
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.USER_DELETED));
 
-      expect(result).toEqual(null);
       expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(signOutSellerUserId);
     });
 
     test('존재하지 않는 유저 아이디로 로그아웃이 실패한 경우 ', async () => {
       const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockResolvedValue(null);
 
-      const result = await sut.signOut(signOutSellerUserId);
+      await expect(async () => {
+        await sut.signOut(signOutSellerUserId);
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.USER_NOT_EXIST));
 
-      expect(result).toEqual(null);
       expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(signOutSellerUserId);
     });
   });
 
   describe('판매자 유저 정보 찾기 테스트', () => {
-    const findUserId = 'test'
+    const findUserId = 'test';
 
     test('세션에 저장된 유저 정보가 존재하고, 삭제되지 않은 유저라면 해당 유저 정보를 반환한다.', async () => {
       const foundSeller: Seller = {
@@ -258,8 +259,8 @@ describe('seller service test ', () => {
         ceoName: 'test',
         companyName: 'CoPang',
         password: testEncryptPassword,
-        deletedAt: null
-      }
+        deletedAt: null,
+      };
       const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockResolvedValue(foundSeller);
       const result = await sut.findUser(findUserId);
 
@@ -267,28 +268,32 @@ describe('seller service test ', () => {
       expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(findUserId);
     });
 
-    test('세션에 저장된 유저 정보가 존재하지만, 삭제된 유저일 경우 null을 반환한다.', async () => {
+    test('세션에 저장된 유저 정보가 존재하지만, 삭제된 유저일 경우 에러를 반환한다.', async () => {
       const foundDeletedSeller: Seller = {
         id: 1,
         userId: findUserId,
         ceoName: 'test',
         companyName: 'CoPang',
         password: testEncryptPassword,
-        deletedAt: new Date()
-      }
+        deletedAt: new Date(),
+      };
 
       const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockResolvedValue(foundDeletedSeller);
-      const result = await sut.findUser(findUserId);
 
-      expect(result).toEqual(null);
+      await expect(async () => {
+        await sut.findUser(findUserId);
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.USER_DELETED));
+
       expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(findUserId);
     });
 
-    test('세션에 저장된 유저 정보가 있지만, 조회된 유저가 없을 때 null을 반환한다.', async () => {
+    test('세션에 저장된 유저 정보가 있지만, 조회된 유저가 없을 때 에러를 반환한다.', async () => {
       const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockResolvedValue(null);
-      const result = await sut.findUser(findUserId);
 
-      expect(result).toEqual(null);
+      await expect(async () => {
+        await sut.findUser(findUserId);
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.USER_NOT_EXIST));
+
       expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(findUserId);
     });
   });
@@ -300,8 +305,8 @@ describe('seller service test ', () => {
       ceoName: 'originCeo',
       companyName: 'CoPang',
       password: testEncryptPassword,
-      deletedAt: null
-    }
+      deletedAt: null,
+    };
 
     const changedSeller: Seller = {
       id: 1,
@@ -309,8 +314,8 @@ describe('seller service test ', () => {
       ceoName: 'changedCeo',
       companyName: 'CoPang',
       password: testEncryptPassword,
-      deletedAt: null
-    }
+      deletedAt: null,
+    };
 
     test('비밀번호를 올바르게 입력하고, 올바른 변경값을 보내 유저 정보를 변경하고 변경된 유저 정보를 반환한다.', async () => {
       const changeInfoIn: ISellerChangeInfoIn = {
@@ -318,42 +323,40 @@ describe('seller service test ', () => {
         originPassword: 'somePassword',
         ceoName: 'changedCeo',
         companyName: 'CoPang',
-        password: testPassword
-      }
+        password: testPassword,
+      };
 
       const sellerChangeInfoOut: TSellerChangeInfoOut = {
         ...changeInfoIn,
-        userId: "test",
+        userId: 'test',
         id: 1,
-        password: testEncryptPassword
-      }
+        password: testEncryptPassword,
+      };
 
       passwordEncryptor.encrypt.calledWith(any()).mockResolvedValue(testEncryptPassword);
 
       const passwordEncryptorSpy = jest.spyOn(passwordEncryptor, 'compare').mockResolvedValue(true);
       const sellerRepositoryUpdateSpy = jest.spyOn(sellerRepository, 'update').mockResolvedValue(changedSeller);
-      const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne')
-        .mockResolvedValueOnce(originSeller).mockResolvedValue(null);
-      const result = await sut.changeInfo(changeInfoIn)
+      const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockResolvedValueOnce(originSeller).mockResolvedValue(null);
+      const result = await sut.changeInfo(changeInfoIn);
 
-      expect(result).toEqual(changedSeller)
+      expect(result).toEqual(changedSeller);
       expect(sellerRepositoryUpdateSpy).toHaveBeenCalledWith(sellerChangeInfoOut);
       expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(changedSeller.userId);
       expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(originSeller.userId);
       expect(passwordEncryptorSpy).toHaveBeenCalledWith(changeInfoIn.password, testEncryptPassword);
     });
 
-    test('비밀번호를 올바르게 입력하지 않아 null 값을 반환한다.', async () => {
+    test('비밀번호를 올바르게 입력하지 않아 에러를 반환한다.', async () => {
       const changeInfoIn: ISellerChangeInfoIn = {
         originUserId: 'test',
         originPassword: 'somePassword',
         ceoName: 'guyCEO',
         companyName: 'CoPang',
-        password: testPassword
-      }
+        password: testPassword,
+      };
 
-      const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne')
-        .mockResolvedValueOnce(originSeller).mockResolvedValue(null);
+      const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockResolvedValueOnce(originSeller).mockResolvedValue(null);
 
       passwordEncryptor.encrypt.calledWith(any()).mockResolvedValue(testEncryptPassword);
 
@@ -362,8 +365,9 @@ describe('seller service test ', () => {
       expect(sellerRepositoryFindOneSpy).toHaveBeenCalledWith(originSeller.userId);
       expect(passwordEncryptorSpy).toHaveBeenCalledWith(changeInfoIn.password, testEncryptPassword);
 
-      const result = await sut.changeInfo(changeInfoIn)
-      expect(result).toEqual(null)
+      await expect(async () => {
+        await sut.changeInfo(changeInfoIn);
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.USER_PASSWORD_NOT_MATCH));
     });
   });
 });

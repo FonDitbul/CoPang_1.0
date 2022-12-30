@@ -1,15 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import {
-  ISellerChangeInfoIn,
-  ISellerSignInIn,
-  Seller,
-  TSellerChangeInfoOut,
-  TSellerSignUpIn,
-  TSellerSignUpOut
-} from "../../../domain/service/seller/seller";
+import { ISellerChangeInfoIn, ISellerSignInIn, Seller, TSellerChangeInfoOut, TSellerSignUpIn, TSellerSignUpOut } from '../../../domain/service/seller/seller';
 import { ISellerRepository } from '../../../domain/service/seller/seller.repository';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 import { IPasswordEncryptor } from '../../../domain/service/auth/encrypt/password.encryptor';
+import { CoPangException, EXCEPTION_STATUS } from '../../../domain/common/exception';
 
 @Injectable()
 export class SellerService implements ISellerService {
@@ -18,7 +12,7 @@ export class SellerService implements ISellerService {
   async signUp(sellerSignUpIn: TSellerSignUpIn): Promise<Seller> {
     const sellerWithSameUserId = await this.sellerRepository.findOne(sellerSignUpIn.userId);
     if (sellerWithSameUserId !== null) {
-      throw Error('이미 등록된 판매자 아이디');
+      throw new CoPangException(EXCEPTION_STATUS.USER_ID_DUPLICATE);
     }
 
     const sellerSignUpOut: TSellerSignUpOut = {
@@ -31,23 +25,27 @@ export class SellerService implements ISellerService {
   async leave(userId: string): Promise<Seller> {
     const seller = await this.sellerRepository.findOne(userId);
     if (seller === null) {
-      throw Error('판매자 아이디에 해당하는 판매자 정보 존재하지 않음');
+      throw new CoPangException(EXCEPTION_STATUS.USER_NOT_EXIST);
     }
     if (seller.deletedAt) {
-      throw Error('이미 삭제된 판매자');
+      throw new CoPangException(EXCEPTION_STATUS.USER_DELETED);
     }
     return await this.sellerRepository.delete(userId);
   }
 
   async signIn(seller: ISellerSignInIn) {
     const oneSeller = await this.sellerRepository.findOne(seller.userId);
-    if (!oneSeller || oneSeller.deletedAt) {
-      return null;
+    if (!oneSeller) {
+      throw new CoPangException(EXCEPTION_STATUS.USER_NOT_EXIST);
     }
 
-    const comparePassword = await this.passwordEncryptor.compare(seller.password, oneSeller.password);
-    if (!comparePassword) {
-      return null;
+    if (oneSeller.deletedAt) {
+      throw new CoPangException(EXCEPTION_STATUS.USER_DELETED);
+    }
+
+    const isPasswordRight = await this.passwordEncryptor.compare(seller.password, oneSeller.password);
+    if (!isPasswordRight) {
+      throw new CoPangException(EXCEPTION_STATUS.USER_PASSWORD_NOT_MATCH);
     }
 
     return oneSeller;
@@ -55,8 +53,12 @@ export class SellerService implements ISellerService {
 
   async signOut(userId: string) {
     const oneSeller = await this.sellerRepository.findOne(userId);
-    if (!oneSeller || oneSeller.deletedAt) {
-      return null;
+    if (!oneSeller) {
+      throw new CoPangException(EXCEPTION_STATUS.USER_NOT_EXIST);
+    }
+
+    if (oneSeller.deletedAt) {
+      throw new CoPangException(EXCEPTION_STATUS.USER_DELETED);
     }
 
     return true;
@@ -64,22 +66,31 @@ export class SellerService implements ISellerService {
 
   async findUser(userId: string): Promise<Seller> {
     const seller = await this.sellerRepository.findOne(userId);
-    if (!seller || seller.deletedAt) {
-      return null;
+    if (!seller) {
+      throw new CoPangException(EXCEPTION_STATUS.USER_NOT_EXIST);
     }
+
+    if (seller.deletedAt) {
+      throw new CoPangException(EXCEPTION_STATUS.USER_DELETED);
+    }
+
     return seller;
   }
 
   async changeInfo(sellerChangeInfoIn: ISellerChangeInfoIn): Promise<Seller> {
     const seller = await this.sellerRepository.findOne(sellerChangeInfoIn.originUserId);
 
-    if (!seller || seller.deletedAt) {
-      return null;
+    if (!seller) {
+      throw new CoPangException(EXCEPTION_STATUS.USER_NOT_EXIST);
+    }
+
+    if (seller.deletedAt) {
+      throw new CoPangException(EXCEPTION_STATUS.USER_DELETED);
     }
 
     const isPasswordRight = await this.passwordEncryptor.compare(sellerChangeInfoIn.originPassword, seller.password);
     if (!isPasswordRight) {
-      return null;
+      throw new CoPangException(EXCEPTION_STATUS.USER_PASSWORD_NOT_MATCH);
     }
 
     const sellerChangeInfoOut: TSellerChangeInfoOut = {
@@ -87,9 +98,8 @@ export class SellerService implements ISellerService {
       userId: seller.userId,
       id: seller.id,
       password: await this.passwordEncryptor.encrypt(sellerChangeInfoIn.password),
-    }
+    };
 
     return await this.sellerRepository.update(sellerChangeInfoOut);
   }
 }
-
