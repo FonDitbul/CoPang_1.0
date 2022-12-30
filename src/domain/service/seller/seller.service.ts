@@ -1,7 +1,4 @@
-// seller service domain 생성하기
-// interface
-
-import { Seller, TSellerSignUpIn, ISellerSignInIn, ISellerChangeInfoIn } from "./seller";
+import { Seller, TSellerSignUpIn, ISellerSignInIn, ISellerChangeInfoIn } from './seller';
 
 export interface ISellerService {
   signUp: (sellerSignUpIn: TSellerSignUpIn) => Promise<Seller>;
