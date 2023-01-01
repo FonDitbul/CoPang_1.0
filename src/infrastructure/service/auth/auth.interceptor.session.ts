@@ -10,7 +10,7 @@ export class SessionSignInInterceptor implements NestInterceptor {
     return next.handle().pipe(
       map((data) => {
         session.user = data;
-        return data
+        return data;
       }),
     );
   }
@@ -34,9 +34,9 @@ export class SessionChangeInfoInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       map((data) => {
-        delete session.user
+        delete session.user;
         session.user = data;
-        return data
+        return data;
       }),
     );
   }

@@ -337,7 +337,10 @@ describe('seller service test ', () => {
 
       const passwordEncryptorSpy = jest.spyOn(passwordEncryptor, 'compare').mockResolvedValue(true);
       const sellerRepositoryUpdateSpy = jest.spyOn(sellerRepository, 'update').mockResolvedValue(changedSeller);
-      const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockResolvedValueOnce(originSeller).mockResolvedValue(null);
+      const sellerRepositoryFindOneSpy = jest
+        .spyOn(sellerRepository, 'findOne')
+        .mockResolvedValueOnce(originSeller)
+        .mockResolvedValue(null);
       const result = await sut.changeInfo(changeInfoIn);
 
       expect(result).toEqual(changedSeller);
@@ -356,7 +359,10 @@ describe('seller service test ', () => {
         password: testPassword,
       };
 
-      const sellerRepositoryFindOneSpy = jest.spyOn(sellerRepository, 'findOne').mockResolvedValueOnce(originSeller).mockResolvedValue(null);
+      const sellerRepositoryFindOneSpy = jest
+        .spyOn(sellerRepository, 'findOne')
+        .mockResolvedValueOnce(originSeller)
+        .mockResolvedValue(null);
 
       passwordEncryptor.encrypt.calledWith(any()).mockResolvedValue(testEncryptPassword);
 

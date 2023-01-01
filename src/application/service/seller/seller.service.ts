@@ -1,5 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ISellerChangeInfoIn, ISellerSignInIn, Seller, TSellerChangeInfoOut, TSellerSignUpIn, TSellerSignUpOut } from '../../../domain/service/seller/seller';
+import {
+  ISellerChangeInfoIn,
+  ISellerSignInIn,
+  Seller,
+  TSellerChangeInfoOut,
+  TSellerSignUpIn,
+  TSellerSignUpOut,
+} from '../../../domain/service/seller/seller';
 import { ISellerRepository } from '../../../domain/service/seller/seller.repository';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 import { IPasswordEncryptor } from '../../../domain/service/auth/encrypt/password.encryptor';
@@ -7,7 +14,10 @@ import { CoPangException, EXCEPTION_STATUS } from '../../../domain/common/except
 
 @Injectable()
 export class SellerService implements ISellerService {
-  constructor(@Inject('ISellerRepository') private sellerRepository: ISellerRepository, @Inject('IPasswordEncryptor') private passwordEncryptor: IPasswordEncryptor) {}
+  constructor(
+    @Inject('ISellerRepository') private sellerRepository: ISellerRepository,
+    @Inject('IPasswordEncryptor') private passwordEncryptor: IPasswordEncryptor,
+  ) {}
 
   async signUp(sellerSignUpIn: TSellerSignUpIn): Promise<Seller> {
     const sellerWithSameUserId = await this.sellerRepository.findOne(sellerSignUpIn.userId);

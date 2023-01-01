@@ -1,4 +1,4 @@
-import { Seller, TSellerChangeInfoOut, TSellerSignUpOut } from "./seller";
+import { Seller, TSellerChangeInfoOut, TSellerSignUpOut } from './seller';
 
 export interface ISellerRepository {
   findOne: (userId: string) => Promise<Seller>;

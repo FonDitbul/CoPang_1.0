@@ -60,4 +60,3 @@ export class TSellerChangeInfoRequest {
 }
 
 export type TSellerChangeInfoResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>;
-
