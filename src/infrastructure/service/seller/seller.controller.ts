@@ -52,6 +52,7 @@ export class SellerController {
     const seller = await this.sellerService.signIn(signInSellerRequest);
 
     const response: TSellerSignInResponse = {
+      id: seller.id,
       userId: seller.userId,
       ceoName: seller.ceoName,
       companyName: seller.companyName,

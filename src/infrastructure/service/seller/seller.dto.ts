@@ -33,7 +33,7 @@ export class SellerSignInRequest {
   password: string;
 }
 
-export type TSellerSignInResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>;
+export type TSellerSignInResponse = Pick<Seller, 'id' | 'userId' | 'ceoName' | 'companyName'>;
 
 export type TSellerLeaveResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>;
 
