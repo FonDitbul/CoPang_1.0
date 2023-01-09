@@ -1,4 +1,12 @@
-import { Seller, TSellerSignUpIn, ISellerSignInIn, ISellerChangeInfoIn } from './seller';
+import {
+  Seller,
+  TSellerSignUpIn,
+  ISellerSignInIn,
+  ISellerChangeInfoIn,
+  TSellerFindProductIn,
+  ISellerFindProductPaging,
+  TSellerSearchProductIn,
+} from './seller';
 
 export interface ISellerService {
   signUp: (sellerSignUpIn: TSellerSignUpIn) => Promise<Seller>;
@@ -7,4 +15,6 @@ export interface ISellerService {
   leave: (userId: string) => Promise<Seller>;
   findUser: (userId: string) => Promise<Seller>;
   changeInfo: (changeSeller: ISellerChangeInfoIn) => Promise<Seller>;
+  findProduct: (condition: TSellerFindProductIn) => Promise<ISellerFindProductPaging>;
+  searchProduct: (condition: TSellerSearchProductIn) => Promise<ISellerFindProductPaging>;
 }
