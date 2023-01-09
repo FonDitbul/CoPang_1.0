@@ -1,6 +1,7 @@
 import { MockProxy, mock, any } from 'jest-mock-extended';
 import { SellerService } from './seller.service';
 import { ISellerRepository } from '../../../domain/service/seller/seller.repository';
+import { IProductRepository } from '../../../domain/service/product/product.repository';
 import { Seller, ISellerSignInIn, ISellerChangeInfoIn, TSellerChangeInfoOut } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 import { IPasswordEncryptor } from '../../../domain/service/auth/encrypt/password.encryptor';
@@ -8,8 +9,9 @@ import { CoPangException, EXCEPTION_STATUS } from '../../../domain/common/except
 
 describe('seller service test ', () => {
   const sellerRepository: MockProxy<ISellerRepository> = mock<ISellerRepository>();
+  const productRepository: MockProxy<IProductRepository> = mock<IProductRepository>();
   const passwordEncryptor: MockProxy<IPasswordEncryptor> = mock<IPasswordEncryptor>();
-  const sut: ISellerService = new SellerService(sellerRepository, passwordEncryptor); // System Under Test
+  const sut: ISellerService = new SellerService(sellerRepository, productRepository, passwordEncryptor); // System Under Test
 
   const givenSeller: Seller = {
     id: 1,

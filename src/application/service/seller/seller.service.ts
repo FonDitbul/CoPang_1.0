@@ -8,6 +8,7 @@ import {
   TSellerSignUpOut,
 } from '../../../domain/service/seller/seller';
 import { ISellerRepository } from '../../../domain/service/seller/seller.repository';
+import { IProductRepository } from '../../../domain/service/product/product.repository';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 import { IPasswordEncryptor } from '../../../domain/service/auth/encrypt/password.encryptor';
 import { CoPangException, EXCEPTION_STATUS } from '../../../domain/common/exception';
@@ -16,6 +17,7 @@ import { CoPangException, EXCEPTION_STATUS } from '../../../domain/common/except
 export class SellerService implements ISellerService {
   constructor(
     @Inject('ISellerRepository') private sellerRepository: ISellerRepository,
+    @Inject('IProductRepository') private productRepository: IProductRepository,
     @Inject('IPasswordEncryptor') private passwordEncryptor: IPasswordEncryptor,
   ) {}
 

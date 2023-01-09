@@ -4,6 +4,7 @@ import { SellerService } from '../../../application/service/seller/seller.servic
 import { SellerController } from './seller.controller';
 import { SellerPrismaRepository } from './seller.prisma.repository';
 import { AuthModule } from '../auth/auth.module';
+import { ProductPrismaRepository } from '../product/product.prisma.repository';
 
 @Module({
   imports: [AuthModule],
@@ -12,6 +13,10 @@ import { AuthModule } from '../auth/auth.module';
     {
       provide: 'ISellerRepository',
       useClass: SellerPrismaRepository,
+    },
+    {
+      provide: 'IProductRepository',
+      useClass: ProductPrismaRepository,
     },
     {
       provide: 'ISellerService',
