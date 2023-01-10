@@ -2,7 +2,15 @@ import { MockProxy, mock, any } from 'jest-mock-extended';
 import { SellerService } from './seller.service';
 import { ISellerRepository } from '../../../domain/service/seller/seller.repository';
 import { IProductRepository } from '../../../domain/service/product/product.repository';
-import { Seller, ISellerSignInIn, ISellerChangeInfoIn, TSellerChangeInfoOut } from '../../../domain/service/seller/seller';
+import {
+  Seller,
+  ISellerSignInIn,
+  ISellerChangeInfoIn,
+  TSellerChangeInfoOut,
+  TSellerFindProductIn,
+  TSellerSearchProductIn,
+  SellerProduct,
+} from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 import { IPasswordEncryptor } from '../../../domain/service/auth/encrypt/password.encryptor';
 import { CoPangException, EXCEPTION_STATUS } from '../../../domain/common/exception';
@@ -376,6 +384,217 @@ describe('seller service test ', () => {
       await expect(async () => {
         await sut.changeInfo(changeInfoIn);
       }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.USER_PASSWORD_NOT_MATCH));
+    });
+  });
+
+  describe('판매자 물품 조회', () => {
+    test('판매자가 물품 조회를 성공했을 경우', async () => {
+      const successCondition: TSellerFindProductIn = {
+        sellerId: 1,
+        order: 'asc',
+        sortBy: 'id',
+        pageNum: 1,
+      };
+
+      const products: SellerProduct[] = [
+        {
+          id: 1,
+          sellerId: 1,
+          productId: 1,
+          price: 1000,
+          count: 50,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          deletedAt: null,
+        },
+      ];
+      jest.spyOn(productRepository, 'findAllWithSellerAndCount').mockResolvedValue([products.length, products]);
+
+      const result = await sut.findProduct(successCondition);
+
+      await expect(result.currentPageNum).toEqual(successCondition.pageNum);
+      await expect(result.totalPageNum).toEqual(Math.round(successCondition.pageNum / 20) + 1);
+    });
+
+    test('판매자가 물품 조회시 order에 잘못된 값을 기입하여 실패한 경우', async () => {
+      const failCondition: TSellerFindProductIn = {
+        sellerId: 1,
+        order: 'ascError',
+        sortBy: 'id',
+        pageNum: 1,
+      };
+
+      await expect(async () => {
+        await sut.findProduct(failCondition);
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.PAGING_ORDER_OPTION_ERROR));
+    });
+
+    test('판매자가 물품 조회시 sortBy에 잘못된 값을 기입하여 실패한 경우', async () => {
+      const failCondition: TSellerFindProductIn = {
+        sellerId: 1,
+        order: 'desc',
+        sortBy: 'iderror',
+        pageNum: 1,
+      };
+
+      await expect(async () => {
+        await sut.findProduct(failCondition);
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.PAGING_SORT_BY_OPTION_ERROR));
+    });
+
+    test('판매자가 물품 조회시 pageNum이 0을 입력하여 실패한 경우', async () => {
+      const failCondition: TSellerFindProductIn = {
+        sellerId: 1,
+        order: 'desc',
+        sortBy: 'id',
+        pageNum: 0,
+      };
+
+      await expect(async () => {
+        await sut.findProduct(failCondition);
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.PAGING_NUM_ERROR));
+    });
+
+    test('판매자가 물품 조회시 현재 페이지 숫자가 전체 페이지 수 보다 커서 실패한 경우', async () => {
+      const failCondition: TSellerFindProductIn = {
+        sellerId: 1,
+        order: 'desc',
+        sortBy: 'id',
+        pageNum: 2,
+      };
+
+      const products: SellerProduct[] = [
+        {
+          id: 1,
+          sellerId: 1,
+          productId: 1,
+          price: 1000,
+          count: 50,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          deletedAt: null,
+        },
+      ];
+      jest.spyOn(productRepository, 'findAllWithSellerAndCount').mockResolvedValue([products.length, products]);
+
+      await expect(async () => {
+        await sut.findProduct(failCondition);
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.PAGING_NUM_ERROR));
+    });
+  });
+
+  describe('판매자 물품 검색 조회', () => {
+    test('판매자가 물품 조회를 성공했을 경우', async () => {
+      const successCondition: TSellerSearchProductIn = {
+        sellerId: 1,
+        text: '노트북',
+        order: 'asc',
+        sortBy: 'id',
+        pageNum: 1,
+      };
+
+      const products: SellerProduct[] = [
+        {
+          id: 1,
+          sellerId: 1,
+          productId: 1,
+          price: 1000,
+          count: 50,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          deletedAt: null,
+        },
+      ];
+      jest.spyOn(productRepository, 'findSearchWithSellerAndCount').mockResolvedValue([products.length, products]);
+
+      const result = await sut.searchProduct(successCondition);
+
+      await expect(result.currentPageNum).toEqual(successCondition.pageNum);
+      await expect(result.totalPageNum).toEqual(Math.round(successCondition.pageNum / 20) + 1);
+    });
+
+    test('판매자가 물품 조회시 text에 아무것도 입력하지 않았을 경우', async () => {
+      const failCondition: TSellerSearchProductIn = {
+        sellerId: 1,
+        text: '',
+        order: 'asc',
+        sortBy: 'id',
+        pageNum: 1,
+      };
+
+      await expect(async () => {
+        await sut.searchProduct(failCondition);
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.SEARCH_STRING_EMPTY));
+    });
+
+    test('판매자가 물품 조회시 order에 잘못된 값을 기입하여 실패한 경우', async () => {
+      const failCondition: TSellerSearchProductIn = {
+        sellerId: 1,
+        text: '노트북',
+        order: 'ascError',
+        sortBy: 'id',
+        pageNum: 1,
+      };
+
+      await expect(async () => {
+        await sut.searchProduct(failCondition);
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.PAGING_ORDER_OPTION_ERROR));
+    });
+
+    test('판매자가 물품 조회시 sortBy에 잘못된 값을 기입하여 실패한 경우', async () => {
+      const failCondition: TSellerSearchProductIn = {
+        sellerId: 1,
+        text: '노트북',
+        order: 'desc',
+        sortBy: 'iderror',
+        pageNum: 1,
+      };
+
+      await expect(async () => {
+        await sut.searchProduct(failCondition);
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.PAGING_SORT_BY_OPTION_ERROR));
+    });
+
+    test('판매자가 물품 조회시 pageNum이 0을 입력하여 실패한 경우', async () => {
+      const failCondition: TSellerSearchProductIn = {
+        sellerId: 1,
+        text: '노트북',
+        order: 'desc',
+        sortBy: 'id',
+        pageNum: 0,
+      };
+
+      await expect(async () => {
+        await sut.searchProduct(failCondition);
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.PAGING_NUM_ERROR));
+    });
+
+    test('판매자가 물품 조회시 현재 페이지 숫자가 전체 페이지 수 보다 커서 실패한 경우', async () => {
+      const failCondition: TSellerSearchProductIn = {
+        sellerId: 1,
+        text: '노트북',
+        order: 'desc',
+        sortBy: 'id',
+        pageNum: 2,
+      };
+
+      const products: SellerProduct[] = [
+        {
+          id: 1,
+          sellerId: 1,
+          productId: 1,
+          price: 1000,
+          count: 50,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          deletedAt: null,
+        },
+      ];
+      jest.spyOn(productRepository, 'findAllWithSellerAndCount').mockResolvedValue([products.length, products]);
+
+      await expect(async () => {
+        await sut.searchProduct(failCondition);
+      }).rejects.toThrowError(new CoPangException(EXCEPTION_STATUS.PAGING_NUM_ERROR));
     });
   });
 });
