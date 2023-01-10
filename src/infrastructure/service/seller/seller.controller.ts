@@ -105,7 +105,7 @@ export class SellerController {
   }
 
   @UseGuards(AuthHttpGuard)
-  @Get('/product/seller/search')
+  @Get('/seller/product/search')
   async findSellerProductSearch(
     @Session() session: Record<string, any>,
     @Query('text') text: string,
@@ -126,7 +126,7 @@ export class SellerController {
   }
 
   @UseGuards(AuthHttpGuard)
-  @Get('/product/seller')
+  @Get('/seller/product')
   async findSellerProduct(
     @Session() session: Record<string, any>,
     @Query('sortBy') sortBy = 'id',
