@@ -17,6 +17,7 @@ import { IProductRepository } from '../../../domain/service/product/product.repo
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 import { IPasswordEncryptor } from '../../../domain/service/auth/encrypt/password.encryptor';
 import { CoPangException, EXCEPTION_STATUS } from '../../../domain/common/exception';
+import { PAGING_MAX_NUMBER } from '../../../domain/common/const';
 
 @Injectable()
 export class SellerService implements ISellerService {
@@ -26,7 +27,6 @@ export class SellerService implements ISellerService {
     @Inject('IPasswordEncryptor') private passwordEncryptor: IPasswordEncryptor,
   ) {}
 
-  private readonly MAX_NUMBER: number = 20;
   private readonly SORT_BY: string[] = ['id', 'price', 'createdAt'];
   private readonly ORDER: string[] = ['asc', 'desc'];
 
@@ -146,12 +146,12 @@ export class SellerService implements ISellerService {
       sellerId: sellerId,
       sortBy: sortBy,
       order: order,
-      skip: pageNum * this.MAX_NUMBER,
-      take: this.MAX_NUMBER,
+      skip: pageNum * PAGING_MAX_NUMBER,
+      take: PAGING_MAX_NUMBER,
     };
     const [count, allProduct] = await this.productRepository.findAllWithSellerAndCount(repositoryCondition);
 
-    const totalPageNum = Math.round(count / this.MAX_NUMBER) + 1;
+    const totalPageNum = Math.round(count / PAGING_MAX_NUMBER) + 1;
     const currentPageNum = pageNum + 1;
 
     if (currentPageNum > totalPageNum) {
@@ -193,12 +193,12 @@ export class SellerService implements ISellerService {
       text: text,
       sortBy: sortBy,
       order: order,
-      skip: pageNum * this.MAX_NUMBER,
-      take: this.MAX_NUMBER,
+      skip: pageNum * PAGING_MAX_NUMBER,
+      take: PAGING_MAX_NUMBER,
     };
     const [count, allProduct] = await this.productRepository.findSearchWithSellerAndCount(repositoryCondition);
 
-    const totalPageNum = Math.round(count / this.MAX_NUMBER) + 1;
+    const totalPageNum = Math.round(count / PAGING_MAX_NUMBER) + 1;
     const currentPageNum = pageNum + 1;
 
     if (currentPageNum > totalPageNum) {
