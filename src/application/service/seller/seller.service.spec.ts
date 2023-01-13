@@ -14,6 +14,7 @@ import {
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 import { IPasswordEncryptor } from '../../../domain/service/auth/encrypt/password.encryptor';
 import { CoPangException, EXCEPTION_STATUS } from '../../../domain/common/exception';
+import { PAGING_MAX_NUMBER } from '../../../domain/common/const';
 
 describe('seller service test ', () => {
   const sellerRepository: MockProxy<ISellerRepository> = mock<ISellerRepository>();
@@ -413,7 +414,7 @@ describe('seller service test ', () => {
       const result = await sut.findProduct(successCondition);
 
       await expect(result.currentPageNum).toEqual(successCondition.pageNum);
-      await expect(result.totalPageNum).toEqual(Math.round(successCondition.pageNum / 20) + 1);
+      await expect(result.totalPageNum).toEqual(Math.round(successCondition.pageNum / PAGING_MAX_NUMBER) + 1);
     });
 
     test('판매자가 물품 조회시 order에 잘못된 값을 기입하여 실패한 경우', async () => {
@@ -510,7 +511,7 @@ describe('seller service test ', () => {
       const result = await sut.searchProduct(successCondition);
 
       await expect(result.currentPageNum).toEqual(successCondition.pageNum);
-      await expect(result.totalPageNum).toEqual(Math.round(successCondition.pageNum / 20) + 1);
+      await expect(result.totalPageNum).toEqual(Math.round(successCondition.pageNum / PAGING_MAX_NUMBER) + 1);
     });
 
     test('판매자가 물품 조회시 text에 아무것도 입력하지 않았을 경우', async () => {
