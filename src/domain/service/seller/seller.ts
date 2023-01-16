@@ -42,22 +42,21 @@ export interface SellerProduct {
 
 export type TSellerFindProductIn = {
   sellerId: number;
+  text: string;
   sortBy: string;
   order: string;
   pageNum: number;
+  take: number;
 };
 
 export type TSellerFindProductOut = {
   sellerId: number;
+  text: string;
   sortBy: string;
   order: string;
   skip: number;
   take: number;
 };
-
-export type TSellerSearchProductIn = TSellerFindProductIn & { text: string };
-
-export type TSellerSearchProductOut = TSellerFindProductOut & { text: string };
 
 export interface ISellerFindProductPaging {
   products: SellerProduct[];

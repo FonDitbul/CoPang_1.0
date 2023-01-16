@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { Product as ProductEntity, SellerProduct as SellerProductEntity } from '@prisma/client';
+import { Prisma, Product as ProductEntity, SellerProduct as SellerProductEntity } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { IProductRepository } from '../../../domain/service/product/product.repository';
-import { TSellerFindProductOut, TSellerSearchProductOut } from '../../../domain/service/seller/seller';
+import { TSellerFindProductOut } from '../../../domain/service/seller/seller';
 
 @Injectable()
 export class ProductPrismaRepository implements IProductRepository {
@@ -11,61 +11,60 @@ export class ProductPrismaRepository implements IProductRepository {
   async findAll(): Promise<ProductEntity[]> {
     return await this.prisma.product.findMany({});
   }
-  async findAllWithSellerAndCount(condition: TSellerFindProductOut): Promise<[number, SellerProductEntity[]]> {
-    const sellerId = condition.sellerId;
-    const orderCondition: { [key: string]: string } = {};
-    orderCondition[condition.sortBy] = condition.order;
 
-    const sellerProductCount = await this.prisma.sellerProduct.count({
-      where: {
+  async findAllWithSellerCount(condition: TSellerFindProductOut): Promise<number> {
+    const sellerId = condition.sellerId;
+    const text = condition.text;
+
+    let whereCondition: Prisma.SellerProductWhereInput = {
+      sellerId: sellerId,
+      deletedAt: null,
+    };
+
+    if (text) {
+      whereCondition = {
         sellerId: sellerId,
         deletedAt: null,
-      },
+        Products: {
+          productName: {
+            contains: text,
+          },
+        },
+      };
+    }
+
+    const sellerProductCount = await this.prisma.sellerProduct.count({
+      where: whereCondition,
     });
 
-    const sellerProduct = await this.prisma.sellerProduct.findMany({
-      where: {
-        sellerId: condition.sellerId,
-        deletedAt: null,
-      },
-      orderBy: [orderCondition],
-      include: {
-        Products: true,
-      },
-      skip: condition.skip,
-      take: condition.take,
-    });
-    return [sellerProductCount, sellerProduct];
+    return sellerProductCount;
   }
 
-  async findSearchWithSellerAndCount(condition: TSellerSearchProductOut): Promise<[number, SellerProductEntity[]]> {
+  async findAllWithSeller(condition: TSellerFindProductOut): Promise<SellerProductEntity[]> {
     const sellerId = condition.sellerId;
     const text = condition.text;
     const orderCondition: { [key: string]: string } = {};
     orderCondition[condition.sortBy] = condition.order;
 
-    const sellerProductCount = await this.prisma.sellerProduct.count({
-      where: {
+    let whereCondition: Prisma.SellerProductWhereInput = {
+      sellerId: sellerId,
+      deletedAt: null,
+    };
+
+    if (text) {
+      whereCondition = {
         sellerId: sellerId,
+        deletedAt: null,
         Products: {
           productName: {
             contains: text,
           },
         },
-        deletedAt: null,
-      },
-    });
+      };
+    }
 
     const sellerProduct = await this.prisma.sellerProduct.findMany({
-      where: {
-        sellerId: condition.sellerId,
-        Products: {
-          productName: {
-            contains: text,
-          },
-        },
-        deletedAt: null,
-      },
+      where: whereCondition,
       orderBy: [orderCondition],
       include: {
         Products: true,
@@ -73,6 +72,7 @@ export class ProductPrismaRepository implements IProductRepository {
       skip: condition.skip,
       take: condition.take,
     });
-    return [sellerProductCount, sellerProduct];
+
+    return sellerProduct;
   }
 }
