@@ -7,8 +7,6 @@ import {
   TSellerChangeInfoOut,
   TSellerFindProductIn,
   TSellerFindProductOut,
-  TSellerSearchProductIn,
-  TSellerSearchProductOut,
   TSellerSignUpIn,
   TSellerSignUpOut,
 } from '../../../domain/service/seller/seller';
@@ -126,9 +124,11 @@ export class SellerService implements ISellerService {
 
   async findProduct(condition: TSellerFindProductIn): Promise<ISellerFindProductPaging> {
     const sellerId = condition.sellerId;
+    const text = condition.text;
     const sortBy = condition.sortBy;
     const order = condition.order;
-    const pageNum = condition.pageNum - 1;
+    let pageNum = condition.pageNum - 1;
+    let take = condition.take;
 
     if (!this.SORT_BY.includes(sortBy)) {
       throw new CoPangException(EXCEPTION_STATUS.PAGING_SORT_BY_OPTION_ERROR);
@@ -139,66 +139,25 @@ export class SellerService implements ISellerService {
     }
 
     if (pageNum < 0) {
-      throw new CoPangException(EXCEPTION_STATUS.PAGING_NUM_ERROR);
+      pageNum = 0;
+    }
+
+    if (take <= 0) {
+      take = PAGING_MAX_NUMBER;
     }
 
     const repositoryCondition: TSellerFindProductOut = {
       sellerId: sellerId,
-      sortBy: sortBy,
-      order: order,
-      skip: pageNum * PAGING_MAX_NUMBER,
-      take: PAGING_MAX_NUMBER,
-    };
-    const [count, allProduct] = await this.productRepository.findAllWithSellerAndCount(repositoryCondition);
-
-    const totalPageNum = Math.round(count / PAGING_MAX_NUMBER) + 1;
-    const currentPageNum = pageNum + 1;
-
-    if (currentPageNum > totalPageNum) {
-      throw new CoPangException(EXCEPTION_STATUS.PAGING_NUM_ERROR);
-    }
-
-    return {
-      products: allProduct,
-      currentPageNum: currentPageNum,
-      totalPageNum: totalPageNum,
-    };
-  }
-
-  async searchProduct(condition: TSellerSearchProductIn): Promise<ISellerFindProductPaging> {
-    const sellerId = condition.sellerId;
-    const text = condition.text;
-    const sortBy = condition.sortBy;
-    const order = condition.order;
-    const pageNum = condition.pageNum - 1;
-
-    if (!this.SORT_BY.includes(sortBy)) {
-      throw new CoPangException(EXCEPTION_STATUS.PAGING_SORT_BY_OPTION_ERROR);
-    }
-
-    if (!this.ORDER.includes(order)) {
-      throw new CoPangException(EXCEPTION_STATUS.PAGING_ORDER_OPTION_ERROR);
-    }
-
-    if (!text) {
-      throw new CoPangException(EXCEPTION_STATUS.SEARCH_STRING_EMPTY);
-    }
-
-    if (pageNum < 0) {
-      throw new CoPangException(EXCEPTION_STATUS.PAGING_NUM_ERROR);
-    }
-
-    const repositoryCondition: TSellerSearchProductOut = {
-      sellerId: sellerId,
       text: text,
       sortBy: sortBy,
       order: order,
-      skip: pageNum * PAGING_MAX_NUMBER,
-      take: PAGING_MAX_NUMBER,
+      skip: pageNum * take,
+      take: take,
     };
-    const [count, allProduct] = await this.productRepository.findSearchWithSellerAndCount(repositoryCondition);
+    const count = await this.productRepository.findAllWithSellerCount(repositoryCondition);
+    const allProduct = await this.productRepository.findAllWithSeller(repositoryCondition);
 
-    const totalPageNum = Math.round(count / PAGING_MAX_NUMBER) + 1;
+    const totalPageNum = Math.round(count / take) + 1;
     const currentPageNum = pageNum + 1;
 
     if (currentPageNum > totalPageNum) {

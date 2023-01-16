@@ -66,9 +66,3 @@ export interface IFindSellerProductResponse {
   currentPageNum: number;
   totalPageNum: number;
 }
-
-export interface ISellerSearchProductResponse {
-  products: SellerProduct[];
-  currentPageNum: number;
-  totalPageNum: number;
-}
