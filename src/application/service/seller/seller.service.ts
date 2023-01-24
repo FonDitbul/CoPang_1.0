@@ -16,7 +16,7 @@ import { ISellerService } from '../../../domain/service/seller/seller.service';
 import { IPasswordEncryptor } from '../../../domain/service/auth/encrypt/password.encryptor';
 import { CoPangException, EXCEPTION_STATUS } from '../../../domain/common/exception';
 import { PAGING_MAX_NUMBER } from '../../../domain/common/const';
-import { ISellerAddProductIn, Product } from '../../../domain/service/product/product';
+import { IAddProductOut, IAddSellerProductOut, ISellerAddProductIn, Product } from '../../../domain/service/product/product';
 
 @Injectable()
 export class SellerService implements ISellerService {
@@ -172,13 +172,62 @@ export class SellerService implements ISellerService {
     };
   }
 
-  // TODO : 트랜잭션의 개발이 필연적인 부분
-  async addProduct(addProductIn: ISellerAddProductIn): Promise<Product> {
-    const seller = await this.sellerRepository.findOneById(addProductIn.sellerId);
+  // TODO : 트랜잭션의 개발이 필연적인 부분. 수동으로 롤백해주다보니 코드가 더럽고, 어차피 삭제 메소드는 제거될 터라 에러 메시지도 정의 안 함.
+  async addProduct(sellerAddProductIn: ISellerAddProductIn): Promise<Product> {
+    const seller = await this.sellerRepository.findOneById(sellerAddProductIn.sellerId);
     if (!seller) {
       throw new CoPangException(EXCEPTION_STATUS.USER_NOT_EXIST);
     }
 
-    return Promise.resolve(undefined);
+    let productEntity;
+    let sellerProductEntity;
+    try {
+      productEntity = await this.addProductEntityOrThrows(sellerAddProductIn);
+      sellerProductEntity = await this.addSellerProductEntityOrThrows(sellerAddProductIn, productEntity.id);
+    } catch (e) {
+      if (productEntity) {
+        try {
+          await this.productRepository.removeProductEntity(productEntity.id);
+        } catch (e) {
+          throw new CoPangException("상품 삭제에서 에러");
+        }
+      }
+      if (sellerProductEntity) {
+        try {
+          await this.productRepository.removeSellerProductEntity(sellerProductEntity.id);
+        } catch (e) {
+          throw new CoPangException("판매자 상품 삭제에서 에러");
+        }
+      }
+    }
+
+    return
+  }
+
+  private async addProductEntityOrThrows(sellerAddProductIn: ISellerAddProductIn) {
+    const addProductOut: IAddProductOut = {
+      productName: sellerAddProductIn.productName,
+      productDesc: sellerAddProductIn.productDesc,
+    };
+
+    try {
+      return await this.productRepository.addOne(addProductOut);
+    } catch (e) {
+      throw new CoPangException(EXCEPTION_STATUS.ENTITY_INSERT_ERROR, '상품');
+    }
+  }
+
+  private async addSellerProductEntityOrThrows(sellerAddProductIn: ISellerAddProductIn, productId: number) {
+    const addSellerProductOut: IAddSellerProductOut = {
+      sellerId: sellerAddProductIn.sellerId,
+      productId: productId,
+      price: sellerAddProductIn.price,
+      count: sellerAddProductIn.count,
+    };
+    try {
+      return await this.productRepository.addOneSellerProduct(addSellerProductOut);
+    } catch (e) {
+      throw new CoPangException(EXCEPTION_STATUS.ENTITY_INSERT_ERROR, '판매자 상품 매핑정보');
+    }
   }
 }

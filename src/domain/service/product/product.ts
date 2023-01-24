@@ -5,7 +5,6 @@ export interface Product {
   deletedAt: Date | null;
 }
 
-
 export interface ISellerAddProductIn {
   productName: string;
   productDesc: string;

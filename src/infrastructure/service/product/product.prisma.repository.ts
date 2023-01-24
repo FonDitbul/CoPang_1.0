@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { Prisma, SellerProduct as SellerProductEntity } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { IProductRepository } from '../../../domain/service/product/product.repository';
-import { TSellerFindProductOut } from '../../../domain/service/seller/seller';
+import { SellerProduct, TSellerFindProductOut } from '../../../domain/service/seller/seller';
+import { IAddProductOut, IAddSellerProductOut, Product } from '../../../domain/service/product/product';
 
 @Injectable()
 export class ProductPrismaRepository implements IProductRepository {
@@ -70,5 +71,41 @@ export class ProductPrismaRepository implements IProductRepository {
     });
 
     return sellerProduct;
+  }
+
+  async addOne(addProductOut: IAddProductOut): Promise<Product> {
+    return await this.prisma.product.create({
+      data: {
+        productName: addProductOut.productName,
+        productDesc: addProductOut.productDesc,
+      },
+    });
+  }
+
+  async addOneSellerProduct(addSellerProductOut: IAddSellerProductOut): Promise<SellerProduct> {
+    return await this.prisma.sellerProduct.create({
+      data: {
+        sellerId: addSellerProductOut.sellerId,
+        productId: addSellerProductOut.productId,
+        price: addSellerProductOut.price,
+        count: addSellerProductOut.price,
+      },
+    });
+  }
+
+  async removeProductEntity(productId: number): Promise<void> {
+    await this.prisma.product.delete({
+      where: {
+        id: productId,
+      }
+    });
+  }
+
+  async removeSellerProductEntity(sellerProductId: number): Promise<void> {
+    await this.prisma.sellerProduct.delete({
+      where: {
+        id: sellerProductId,
+      }
+    });
   }
 }

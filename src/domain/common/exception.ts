@@ -7,6 +7,8 @@ export const EXCEPTION_STATUS = {
   PAGING_NUM_ERROR: '페이징 넘버 에러',
   PAGING_SORT_BY_OPTION_ERROR: '존재하지 않는 정렬 옵션',
   PAGING_ORDER_OPTION_ERROR: 'asc or desc 가 아닙니다',
+
+  ENTITY_INSERT_ERROR: '{0}을(를) 저장하는 데에 실패했습니다.',
 };
 
 export class CoPangException extends Error {
