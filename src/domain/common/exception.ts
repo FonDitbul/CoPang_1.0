@@ -10,7 +10,17 @@ export const EXCEPTION_STATUS = {
 };
 
 export class CoPangException extends Error {
-  private static message: string;
+  message: string;
+  constructor(message: string, ...args: any[]) {
+    super();
+    let resultMessage = message;
+    args.forEach((val, index) => {
+      const findWord = `{${index}}`; // {0}, {1}, {2} ...
+      resultMessage = resultMessage.replace(findWord, val);
+    });
+    this.message = resultMessage;
+  }
+
   getMessage() {
     return this.message;
   }
