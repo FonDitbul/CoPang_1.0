@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, Product as ProductEntity, SellerProduct as SellerProductEntity } from '@prisma/client';
+import { Prisma, SellerProduct as SellerProductEntity } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { IProductRepository } from '../../../domain/service/product/product.repository';
 import { TSellerFindProductOut } from '../../../domain/service/seller/seller';
@@ -7,10 +7,6 @@ import { TSellerFindProductOut } from '../../../domain/service/seller/seller';
 @Injectable()
 export class ProductPrismaRepository implements IProductRepository {
   constructor(private prisma: PrismaService) {}
-
-  async findAll(): Promise<ProductEntity[]> {
-    return await this.prisma.product.findMany({});
-  }
 
   async findAllWithSellerCount(condition: TSellerFindProductOut): Promise<number> {
     const sellerId = condition.sellerId;

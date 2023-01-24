@@ -104,29 +104,6 @@ export class SellerController {
     return sellerInformation;
   }
 
-  // @UseGuards(AuthHttpGuard)
-  // @Get('/seller/product/search')
-  // async findSellerProductSearch(
-  //   @Session() session: Record<string, any>,
-  //   @Query('text') text: string,
-  //   @Query('sortBy') sortBy = 'id',
-  //   @Query('order') order = 'desc',
-  //   @Query('pageNum') pageNum = 1,
-  //   @Query('take') take = PAGING_MAX_NUMBER,
-  // ) {
-  //   const sellerId: number = session.user.id;
-  //   const condition: TSellerSearchProductIn = {
-  //     sellerId: sellerId,
-  //     text: text,
-  //     sortBy: sortBy,
-  //     order: order,
-  //     pageNum: pageNum,
-  //     take: take,
-  //   };
-  //   const productArray: ISellerSearchProductResponse = await this.sellerService.searchProduct(condition);
-  //   return productArray;
-  // }
-
   @UseGuards(AuthHttpGuard)
   @Get('/seller/product')
   async findSellerProduct(

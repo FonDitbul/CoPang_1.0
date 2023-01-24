@@ -37,7 +37,6 @@ export interface SellerProduct {
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
-  Products?: Product;
 }
 
 export type TSellerFindProductIn = {
