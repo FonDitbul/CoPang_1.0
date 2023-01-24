@@ -9,12 +9,14 @@ import {
   TSellerChangeInfoRequest,
   TSellerChangeInfoResponse,
   IFindSellerProductResponse,
+  TSellerAddProductRequest,
 } from './seller.dto';
 import { ISellerChangeInfoIn, TSellerFindProductIn, TSellerSignUpIn } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 import { AuthHttpGuard } from '../auth/auth.http.guard';
 import { SessionChangeInfoInterceptor, SessionSignInInterceptor, SessionSignOutInterceptor } from '../auth/auth.interceptor.session';
 import { PAGING_MAX_NUMBER } from '../../../domain/common/const';
+import { ISellerAddProductIn } from '../../../domain/service/product/product';
 
 @Controller()
 export class SellerController {
@@ -126,5 +128,20 @@ export class SellerController {
     const productArray: IFindSellerProductResponse = await this.sellerService.findProduct(productCondition);
 
     return productArray;
+  }
+
+  @UseGuards(AuthHttpGuard)
+  @UseInterceptors(SessionChangeInfoInterceptor)
+  @Post('/seller/add-product')
+  async addProduct(@Session() session: Record<string, any>, @Body() addProductRequest: TSellerAddProductRequest) {
+    const sellerAddProductIn: ISellerAddProductIn = {
+      productName: addProductRequest.productName,
+      productDesc: addProductRequest.productDesc,
+      price: addProductRequest.price,
+      count: addProductRequest.count,
+      sellerId: session.user.id,
+    };
+
+    return this.sellerService.addProduct(sellerAddProductIn);
   }
 }

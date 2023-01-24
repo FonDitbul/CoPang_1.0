@@ -16,6 +16,7 @@ import { ISellerService } from '../../../domain/service/seller/seller.service';
 import { IPasswordEncryptor } from '../../../domain/service/auth/encrypt/password.encryptor';
 import { CoPangException, EXCEPTION_STATUS } from '../../../domain/common/exception';
 import { PAGING_MAX_NUMBER } from '../../../domain/common/const';
+import { ISellerAddProductIn, Product } from '../../../domain/service/product/product';
 
 @Injectable()
 export class SellerService implements ISellerService {
@@ -169,5 +170,15 @@ export class SellerService implements ISellerService {
       currentPageNum: currentPageNum,
       totalPageNum: totalPageNum,
     };
+  }
+
+  // TODO : 트랜잭션의 개발이 필연적인 부분
+  async addProduct(addProductIn: ISellerAddProductIn): Promise<Product> {
+    const seller = await this.sellerRepository.findOneById(addProductIn.sellerId);
+    if (!seller) {
+      throw new CoPangException(EXCEPTION_STATUS.USER_NOT_EXIST);
+    }
+
+    return Promise.resolve(undefined);
   }
 }

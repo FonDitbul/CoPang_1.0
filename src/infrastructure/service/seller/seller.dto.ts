@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, Matches } from 'class-validator';
+import { IsString, IsNotEmpty, Matches, IsInt, Min } from 'class-validator';
 import { Seller, SellerProduct } from '../../../domain/service/seller/seller';
 
 export class TSellerSignUpRequest {
@@ -65,4 +65,22 @@ export interface IFindSellerProductResponse {
   products: SellerProduct[];
   currentPageNum: number;
   totalPageNum: number;
+}
+
+export class TSellerAddProductRequest {
+  @IsString()
+  @IsNotEmpty()
+  productName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  productDesc: string;
+
+  @IsInt()
+  @Min(0)
+  price: number;
+
+  @IsInt()
+  @Min(0)
+  count: number;
 }

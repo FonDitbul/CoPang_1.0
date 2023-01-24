@@ -8,6 +8,14 @@ import { PrismaService } from '../../prisma/prisma.service';
 export class SellerPrismaRepository implements ISellerRepository {
   constructor(private prisma: PrismaService) {}
 
+  async findOneById(id: number): Promise<SellerEntity | null> {
+    return await this.prisma.seller.findUnique({
+      where: {
+        id: id,
+      },
+    });
+  }
+
   async findOne(userId: string): Promise<SellerEntity | null> {
     return await this.prisma.seller.findUnique({
       where: {
