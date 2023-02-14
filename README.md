@@ -11,7 +11,7 @@
         * 아키텍처와 테스트
         * 유닛 테스트
 
-### structure
+### Structure
 ```                             
 ├─src                            
 │  ├─application                 
@@ -32,7 +32,6 @@
 │          ├─common
 │          ├─product
 │          └─seller
-└─test
 ```
 
 # application 
@@ -54,6 +53,7 @@
     - 외부에서 제공하는 인터페이스, 라이브러리에 맞게 구현한 구현체
 
 
+![Untitled](https://user-images.githubusercontent.com/49264688/218756289-f629761f-83a5-4c01-a06b-fe6e1f57413e.png)
 
 
 ## Installation
